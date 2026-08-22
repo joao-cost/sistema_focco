@@ -1,0 +1,48 @@
+# Ambiente de DESENVOLVIMENTO — hot reload, tudo em Docker.
+# Uso:
+#   docker compose up
+#   (primeira vez ou após mudar o schema) docker compose exec app npm run db:seed
+#
+# A aplicação sobe em http://localhost:3000
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: focco
+      POSTGRES_PASSWORD: focco
+      POSTGRES_DB: sistema_focco
+    ports:
+      - "5432:5432"
+    volumes:
+      - focco_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U focco -d sistema_focco"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run db:migrate && npm run dev"
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://focco:focco@db:5432/sistema_focco
+      AUTH_SECRET: dev-secret-change-me
+      AUTH_TRUST_HOST: "true"
+      NEXT_TELEMETRY_DISABLED: "1"
+    volumes:
+      - .:/app
+      - focco_node_modules:/app/node_modules
+      - focco_next_cache:/app/.next
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  focco_db_data:
+  focco_node_modules:
+  focco_next_cache:

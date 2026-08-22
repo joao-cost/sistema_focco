@@ -1,0 +1,43 @@
+# Ambiente de PRODUÇÃO — VPS própria (via `docker compose` ou `docker stack deploy`
+# num Docker Swarm existente).
+#
+# Antes de subir, defina as variáveis (arquivo .env.prod na mesma pasta, ou
+# exportadas no shell): DB_PASSWORD, AUTH_SECRET, AUTH_URL.
+#
+# 1) Build da imagem (uma vez, e a cada nova versão):
+#      docker build -t sistema_focco:latest .
+#
+# 2a) Deploy simples com docker compose:
+#      docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
+#
+# 2b) Deploy num Docker Swarm já existente:
+#      export $(grep -v '^#' .env.prod | xargs) && \
+#      docker stack deploy -c docker-compose.prod.yml focco
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: focco
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env.prod}
+      POSTGRES_DB: sistema_focco
+    volumes:
+      - focco_db_data:/var/lib/postgresql/data
+
+  app:
+    image: sistema_focco:latest
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://focco:${DB_PASSWORD:?defina DB_PASSWORD no .env.prod}@db:5432/sistema_focco
+      AUTH_SECRET: ${AUTH_SECRET:?defina AUTH_SECRET no .env.prod}
+      AUTH_TRUST_HOST: "true"
+      AUTH_URL: ${AUTH_URL:-}
+      NEXT_TELEMETRY_DISABLED: "1"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+volumes:
+  focco_db_data:

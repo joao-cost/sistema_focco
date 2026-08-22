@@ -1,0 +1,686 @@
+{
+  "id": "01a18a4a-5122-4386-91a3-742adabbda02",
+  "prevId": "56f881e6-b8cd-46b6-adaf-aaa942d2d6b8",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.avisos": {
+      "name": "avisos",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "celula_id": {
+          "name": "celula_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "data": {
+          "name": "data",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "horario": {
+          "name": "horario",
+          "type": "varchar(60)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mensagem": {
+          "name": "mensagem",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "validade_ate": {
+          "name": "validade_ate",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "registrado_por_id": {
+          "name": "registrado_por_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "avisos_celula_id_celulas_id_fk": {
+          "name": "avisos_celula_id_celulas_id_fk",
+          "tableFrom": "avisos",
+          "tableTo": "celulas",
+          "columnsFrom": [
+            "celula_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "avisos_registrado_por_id_users_id_fk": {
+          "name": "avisos_registrado_por_id_users_id_fk",
+          "tableFrom": "avisos",
+          "tableTo": "users",
+          "columnsFrom": [
+            "registrado_por_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.celula_facilitadores": {
+      "name": "celula_facilitadores",
+      "schema": "",
+      "columns": {
+        "celula_id": {
+          "name": "celula_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "facilitador_id": {
+          "name": "facilitador_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "celula_facilitadores_celula_id_celulas_id_fk": {
+          "name": "celula_facilitadores_celula_id_celulas_id_fk",
+          "tableFrom": "celula_facilitadores",
+          "tableTo": "celulas",
+          "columnsFrom": [
+            "celula_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "celula_facilitadores_facilitador_id_users_id_fk": {
+          "name": "celula_facilitadores_facilitador_id_users_id_fk",
+          "tableFrom": "celula_facilitadores",
+          "tableTo": "users",
+          "columnsFrom": [
+            "facilitador_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "celula_facilitadores_celula_id_facilitador_id_pk": {
+          "name": "celula_facilitadores_celula_id_facilitador_id_pk",
+          "columns": [
+            "celula_id",
+            "facilitador_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.celulandos": {
+      "name": "celulandos",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "celula_id": {
+          "name": "celula_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "matricula": {
+          "name": "matricula",
+          "type": "varchar(60)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "curso": {
+          "name": "curso",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "telefone": {
+          "name": "telefone",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "celulando_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'ativo'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "celulandos_celula_id_celulas_id_fk": {
+          "name": "celulandos_celula_id_celulas_id_fk",
+          "tableFrom": "celulandos",
+          "tableTo": "celulas",
+          "columnsFrom": [
+            "celula_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.celulas": {
+      "name": "celulas",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nome": {
+          "name": "nome",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tema": {
+          "name": "tema",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "curso": {
+          "name": "curso",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "articulador_id": {
+          "name": "articulador_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "celula_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'ativa'"
+        },
+        "dia_semana": {
+          "name": "dia_semana",
+          "type": "dia_semana",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "turno": {
+          "name": "turno",
+          "type": "turno",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "horario": {
+          "name": "horario",
+          "type": "varchar(60)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "local": {
+          "name": "local",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "observacoes": {
+          "name": "observacoes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "celulas_articulador_id_users_id_fk": {
+          "name": "celulas_articulador_id_users_id_fk",
+          "tableFrom": "celulas",
+          "tableTo": "users",
+          "columnsFrom": [
+            "articulador_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.encontros": {
+      "name": "encontros",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "celula_id": {
+          "name": "celula_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data": {
+          "name": "data",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "conteudo_trabalhado": {
+          "name": "conteudo_trabalhado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "duracao_minutos": {
+          "name": "duracao_minutos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "processamento_grupo": {
+          "name": "processamento_grupo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "observacoes": {
+          "name": "observacoes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "registrado_por_id": {
+          "name": "registrado_por_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "encontros_celula_id_celulas_id_fk": {
+          "name": "encontros_celula_id_celulas_id_fk",
+          "tableFrom": "encontros",
+          "tableTo": "celulas",
+          "columnsFrom": [
+            "celula_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "encontros_registrado_por_id_users_id_fk": {
+          "name": "encontros_registrado_por_id_users_id_fk",
+          "tableFrom": "encontros",
+          "tableTo": "users",
+          "columnsFrom": [
+            "registrado_por_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.presencas": {
+      "name": "presencas",
+      "schema": "",
+      "columns": {
+        "encontro_id": {
+          "name": "encontro_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "celulando_id": {
+          "name": "celulando_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "presente": {
+          "name": "presente",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "justificativa": {
+          "name": "justificativa",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "presencas_encontro_id_encontros_id_fk": {
+          "name": "presencas_encontro_id_encontros_id_fk",
+          "tableFrom": "presencas",
+          "tableTo": "encontros",
+          "columnsFrom": [
+            "encontro_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "presencas_celulando_id_celulandos_id_fk": {
+          "name": "presencas_celulando_id_celulandos_id_fk",
+          "tableFrom": "presencas",
+          "tableTo": "celulandos",
+          "columnsFrom": [
+            "celulando_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "presencas_encontro_id_celulando_id_pk": {
+          "name": "presencas_encontro_id_celulando_id_pk",
+          "columns": [
+            "encontro_id",
+            "celulando_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "user_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'articulador'"
+        },
+        "curso": {
+          "name": "curso",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "telefone": {
+          "name": "telefone",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ativo": {
+          "name": "ativo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.celula_status": {
+      "name": "celula_status",
+      "schema": "public",
+      "values": [
+        "ativa",
+        "inativa",
+        "encerrada"
+      ]
+    },
+    "public.celulando_status": {
+      "name": "celulando_status",
+      "schema": "public",
+      "values": [
+        "ativo",
+        "inativo",
+        "desistente"
+      ]
+    },
+    "public.dia_semana": {
+      "name": "dia_semana",
+      "schema": "public",
+      "values": [
+        "segunda",
+        "terca",
+        "quarta",
+        "quinta",
+        "sexta",
+        "sabado",
+        "domingo"
+      ]
+    },
+    "public.turno": {
+      "name": "turno",
+      "schema": "public",
+      "values": [
+        "manha",
+        "tarde",
+        "noite"
+      ]
+    },
+    "public.user_role": {
+      "name": "user_role",
+      "schema": "public",
+      "values": [
+        "coordenacao",
+        "facilitador",
+        "articulador"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
