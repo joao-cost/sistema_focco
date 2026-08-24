@@ -133,6 +133,48 @@ Se preferir rodar localmente sem Docker: Postgres 16 acessível via
    com HTTPS — recomendado pela própria documentação de self-hosting do
    Next.js.
 
+## Deploy em produção (Vercel + Supabase, 100% gratuito)
+
+Alternativa sem servidor próprio, usando os planos gratuitos da Vercel
+(hosting) e do Supabase (Postgres). Útil para validar o sistema antes de
+investir numa VPS — tem limitações (ver abaixo) mas roda o app real.
+
+1. **Crie o projeto no Supabase** (supabase.com, plano Free): anote a senha
+   do banco na criação. Em *Project Settings > Database > Connection string*
+   pegue duas strings:
+   - **Transaction pooler** (porta 6543) → variável `DATABASE_URL`
+   - **Direct connection** (porta 5432) → variável `DIRECT_URL`
+2. **Importe o repositório na Vercel** (vercel.com > Add New > Project),
+   selecionando este repo no GitHub. A Vercel detecta Next.js automaticamente.
+3. **Configure as variáveis de ambiente** do projeto na Vercel
+   (Settings > Environment Variables), para o ambiente de Produção:
+   - `DATABASE_URL` — connection string do pooler (passo 1)
+   - `DIRECT_URL` — connection string direta (passo 1)
+   - `AUTH_SECRET` — gere com `openssl rand -base64 32`
+   - `DATABASE_POOL_MAX=2` (opcional, mas recomendado em serverless)
+4. **Deploy.** O build usa `scripts/vercel-build.sh` (configurado via
+   `vercel.json`), que roda as migrations (`scripts/migrate.mjs`, usando
+   `DIRECT_URL`) **apenas quando `VERCEL_ENV=production`** — ou seja, só no
+   deploy da branch de produção, nunca em Preview Deployments de PRs/branches,
+   já que o Supabase Free tem um único banco compartilhado por todos os
+   ambientes.
+5. Depois do primeiro deploy, rode o seed (`npm run db:seed`) uma vez, ou
+   crie o primeiro usuário `coordenacao` manualmente no banco.
+
+**Limitações a ter em mente** (planos Free, ago/2026 — reconfirme nos sites
+oficiais antes de decidir permanecer):
+
+- Supabase Free **pausa o projeto automaticamente após ~1 semana sem uso**
+  (precisa reativar manualmente no painel).
+- Banco limitado a 500 MB, até 60 conexões diretas / 200 via pooler, sem
+  backups automáticos, logs com retenção de 1 dia.
+- Vercel Hobby é para **uso pessoal/não-comercial**; funções com limite de
+  duração de 300s e uso de CPU mensurado (4 CPU-horas/mês).
+- Se essas limitações pesarem (ex: uso real e contínuo pela coordenação do
+  FOCCO), o caminho de volta é o deploy em VPS/Docker Swarm descrito acima —
+  o código já é compatível com os dois (a diferença é só a origem das
+  variáveis `DATABASE_URL`/`DIRECT_URL`).
+
 ## Estrutura do projeto
 
 ```

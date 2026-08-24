@@ -11,9 +11,19 @@ if (!connectionString) {
   throw new Error("DATABASE_URL não definida. Configure o arquivo .env.");
 }
 
-// Reaproveita a conexão em dev (hot reload) para não esgotar o pool.
+// Tamanho do pool de conexões por instância do app.
+// - Docker/VPS (processo único e persistente): pode ser maior (padrão 10).
+// - Serverless (Vercel + pooler do Supabase): mantenha baixo (1-2), já que
+//   cada invocação de função é curta e o Supavisor cuida do pooling real.
+const maxConnections = Number(process.env.DATABASE_POOL_MAX) || 10;
+
+// `prepare: false` é necessário quando a conexão passa pelo pooler em modo
+// "transaction" (Supabase/PgBouncer) — prepared statements não sobrevivem
+// entre transações nesse modo. Não tem custo real em conexão direta.
 const client =
-  global.__focco_pg_client__ ?? postgres(connectionString, { max: 10 });
+  global.__focco_pg_client__ ??
+  postgres(connectionString, { max: maxConnections, prepare: false });
+
 if (process.env.NODE_ENV !== "production") {
   global.__focco_pg_client__ = client;
 }
