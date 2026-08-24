@@ -25,13 +25,16 @@ export function Nav({ role }: { role: UserRole }) {
             key={link.href}
             href={link.href}
             className={cn(
-              "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+              "relative rounded-lg px-3 py-2 text-sm font-medium transition-colors",
               active
-                ? "bg-focco-green/15 text-focco-green"
+                ? "bg-focco-green-pale text-focco-green-dark"
                 : "text-muted hover:bg-gray-100 hover:text-foreground"
             )}
           >
             {link.label}
+            {active && (
+              <span className="focco-accent-bar absolute inset-x-2 -bottom-[1px] h-0.5 rounded-full" />
+            )}
           </Link>
         );
       })}

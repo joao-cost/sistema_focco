@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { verifySession } from "@/lib/dal";
 import { Nav } from "./nav";
 import { logoutAction } from "./logout-action";
@@ -8,14 +9,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const session = await verifySession();
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="border-b border-border bg-surface">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+    <div className="flex min-h-screen flex-col bg-background">
+      <header className="sticky top-0 z-10 border-b border-border bg-surface/90 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2.5">
           <div className="flex items-center gap-6">
-            <span className="text-lg font-bold">
-              <span className="text-focco-green">FOCC</span>
-              <span className="text-focco-blue">O</span>
-            </span>
+            <Image
+              src="/brand/logo-focco.png"
+              alt="FOCCO"
+              width={200}
+              height={70}
+              priority
+              className="h-8 w-auto"
+            />
             <Nav role={session.user.role} />
           </div>
           <div className="flex items-center gap-3">
@@ -30,6 +35,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </form>
           </div>
         </div>
+        <div className="focco-accent-bar h-[3px]" />
       </header>
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">{children}</main>
     </div>

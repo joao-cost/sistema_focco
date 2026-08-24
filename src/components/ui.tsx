@@ -12,7 +12,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-xl border border-border bg-surface shadow-sm",
+        "rounded-2xl border border-border bg-surface shadow-sm shadow-black/[0.03]",
         className
       )}
     >
@@ -43,26 +43,35 @@ export function CardHeader({
   );
 }
 
+const BUTTON_SIZES = {
+  sm: "px-3 py-1.5 text-sm",
+  md: "px-4 py-2 text-sm",
+  lg: "px-5 py-2.5 text-sm",
+} as const;
+
+const BUTTON_VARIANTS = {
+  primary:
+    "bg-focco-green text-white shadow-sm shadow-focco-green/20 hover:bg-focco-green-dark",
+  secondary: "border border-border bg-surface text-foreground hover:bg-gray-50",
+  ghost: "text-foreground hover:bg-gray-100",
+  danger: "bg-focco-red text-white shadow-sm shadow-focco-red/20 hover:bg-focco-red-dark",
+} as const;
+
 export function Button({
   className,
   variant = "primary",
   size = "md",
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary" | "ghost" | "danger";
-  size?: "sm" | "md";
+  variant?: keyof typeof BUTTON_VARIANTS;
+  size?: keyof typeof BUTTON_SIZES;
 }) {
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
-        size === "sm" ? "px-3 py-1.5 text-sm" : "px-4 py-2 text-sm",
-        variant === "primary" &&
-          "bg-focco-green text-white hover:bg-[#5a9c33]",
-        variant === "secondary" &&
-          "border border-border bg-surface text-foreground hover:bg-gray-50",
-        variant === "ghost" && "text-foreground hover:bg-gray-100",
-        variant === "danger" && "bg-focco-pink text-white hover:opacity-90",
+        "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100",
+        BUTTON_SIZES[size],
+        BUTTON_VARIANTS[variant],
         className
       )}
       {...props}
@@ -79,21 +88,17 @@ export function LinkButton({
 }: {
   href: string;
   className?: string;
-  variant?: "primary" | "secondary" | "ghost";
-  size?: "sm" | "md";
+  variant?: keyof typeof BUTTON_VARIANTS;
+  size?: keyof typeof BUTTON_SIZES;
   children: React.ReactNode;
 }) {
   return (
     <Link
       href={href}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors",
-        size === "sm" ? "px-3 py-1.5 text-sm" : "px-4 py-2 text-sm",
-        variant === "primary" &&
-          "bg-focco-green text-white hover:bg-[#5a9c33]",
-        variant === "secondary" &&
-          "border border-border bg-surface text-foreground hover:bg-gray-50",
-        variant === "ghost" && "text-foreground hover:bg-gray-100",
+        "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all active:scale-[0.98]",
+        BUTTON_SIZES[size],
+        BUTTON_VARIANTS[variant],
         className
       )}
     >
@@ -102,46 +107,25 @@ export function LinkButton({
   );
 }
 
+const FIELD_BASE =
+  "w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted transition-colors focus:border-focco-blue focus:outline-none focus:ring-2 focus:ring-focco-blue/25";
+
 export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
-  return (
-    <input
-      className={cn(
-        "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-muted focus:border-focco-green focus:outline-none focus:ring-1 focus:ring-focco-green",
-        className
-      )}
-      {...props}
-    />
-  );
+  return <input className={cn(FIELD_BASE, className)} {...props} />;
 }
 
 export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return (
-    <textarea
-      className={cn(
-        "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-muted focus:border-focco-green focus:outline-none focus:ring-1 focus:ring-focco-green",
-        className
-      )}
-      {...props}
-    />
-  );
+  return <textarea className={cn(FIELD_BASE, className)} {...props} />;
 }
 
 export function Select({ className, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
-  return (
-    <select
-      className={cn(
-        "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground focus:border-focco-green focus:outline-none focus:ring-1 focus:ring-focco-green",
-        className
-      )}
-      {...props}
-    />
-  );
+  return <select className={cn(FIELD_BASE, className)} {...props} />;
 }
 
 export function Label({ className, ...props }: LabelHTMLAttributes<HTMLLabelElement>) {
   return (
     <label
-      className={cn("mb-1 block text-sm font-medium text-foreground", className)}
+      className={cn("mb-1.5 block text-sm font-medium text-foreground", className)}
       {...props}
     />
   );
@@ -162,28 +146,30 @@ export function Field({
     <div>
       <Label htmlFor={htmlFor}>{label}</Label>
       {children}
-      {error && <p className="mt-1 text-xs text-focco-pink">{error}</p>}
+      {error && <p className="mt-1 text-xs text-focco-red">{error}</p>}
     </div>
   );
 }
 
+// Chips usando a paleta oficial FOCCO (tom pálido de fundo + tom escuro no
+// texto, mesma lógica das cores nomeadas em paleta.png).
 const BADGE_STYLES: Record<string, string> = {
-  ativa: "bg-green-100 text-green-800",
-  ativo: "bg-green-100 text-green-800",
+  ativa: "bg-focco-green-pale text-focco-green-dark",
+  ativo: "bg-focco-green-pale text-focco-green-dark",
   inativa: "bg-gray-100 text-gray-700",
   inativo: "bg-gray-100 text-gray-700",
   encerrada: "bg-gray-200 text-gray-600",
-  desistente: "bg-red-100 text-red-700",
-  coordenacao: "bg-focco-blue/15 text-focco-blue",
-  facilitador: "bg-focco-orange/15 text-orange-700",
-  articulador: "bg-focco-green/15 text-green-800",
+  desistente: "bg-focco-red-pale text-focco-red-dark",
+  coordenacao: "bg-focco-blue-pale text-focco-blue-dark",
+  facilitador: "bg-focco-orange-pale text-focco-orange-dark",
+  articulador: "bg-focco-green-pale text-focco-green-dark",
 };
 
 export function Badge({ value, label }: { value: string; label: string }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold",
         BADGE_STYLES[value] ?? "bg-gray-100 text-gray-700"
       )}
     >
@@ -210,19 +196,29 @@ export function EmptyState({
   );
 }
 
+const STAT_ACCENTS = ["focco-green", "focco-blue", "focco-orange", "focco-pink"] as const;
+
 export function StatTile({
   label,
   value,
   description,
+  accent = 0,
 }: {
   label: string;
   value: string | number;
   description?: string;
+  /** Índice (0-3) na sequência de cores da marca — dá variedade visual num grid de tiles. */
+  accent?: number;
 }) {
+  const color = STAT_ACCENTS[accent % STAT_ACCENTS.length];
   return (
-    <Card className="p-5">
+    <Card className="relative overflow-hidden p-5 pl-6">
+      <span
+        className="absolute left-0 top-0 h-full w-1"
+        style={{ backgroundColor: `var(--${color})` }}
+      />
       <p className="text-sm text-muted">{label}</p>
-      <p className="mt-1 text-3xl font-semibold text-foreground">{value}</p>
+      <p className="mt-1 text-3xl font-bold tracking-tight text-foreground">{value}</p>
       {description && <p className="mt-1 text-xs text-muted">{description}</p>}
     </Card>
   );
@@ -231,7 +227,7 @@ export function StatTile({
 export function FormError({ message }: { message?: string }) {
   if (!message) return null;
   return (
-    <div className="rounded-lg border border-focco-pink/30 bg-focco-pink/5 px-3 py-2 text-sm text-focco-pink">
+    <div className="rounded-xl border border-focco-red/25 bg-focco-red-pale/60 px-3.5 py-2.5 text-sm font-medium text-focco-red-dark">
       {message}
     </div>
   );

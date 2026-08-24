@@ -1,18 +1,38 @@
 @import "tailwindcss";
 
+/* Inter self-hospedada (@fontsource) — sem dependência de rede em build/
+   runtime, funciona igual na Vercel, no Docker e localmente. */
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/inter/800.css";
+
 :root {
-  --background: #f7f8fa;
-  --foreground: #101828;
+  --background: #f6f7f9;
+  --foreground: #0f1f3a;
   --surface: #ffffff;
   --border: #e4e7ec;
   --muted: #667085;
 
-  /* Paleta da marca FOCCO */
-  --focco-green: #6cb33f;
-  --focco-orange: #f5a623;
-  --focco-blue: #3d85c6;
+  /* Paleta oficial da marca FOCCO (paleta.png) */
+  --focco-green: #6dbe45;
+  --focco-green-dark: #4f9a2e;
+  --focco-green-pale: #dff2d6;
+  --focco-blue: #2e86c1;
+  --focco-blue-dark: #1f5f8f;
+  --focco-blue-pale: #d6eaf8;
+  --focco-orange: #f39c12;
+  --focco-orange-dark: #c77800;
+  --focco-orange-pale: #fdebd0;
   --focco-pink: #e91e63;
-  --focco-navy: #0f1b2d;
+  --focco-pink-dark: #b7154c;
+  --focco-pink-pale: #fadbd8;
+  --focco-red: #d82435;
+  --focco-red-dark: #b6162a;
+  --focco-red-pale: #f5d3d6;
+  --focco-navy: #0f1f3a;
+  --focco-navy-deep: #0a1526;
 }
 
 @theme inline {
@@ -22,21 +42,41 @@
   --color-border: var(--border);
   --color-muted: var(--muted);
   --color-focco-green: var(--focco-green);
-  --color-focco-orange: var(--focco-orange);
+  --color-focco-green-dark: var(--focco-green-dark);
+  --color-focco-green-pale: var(--focco-green-pale);
   --color-focco-blue: var(--focco-blue);
+  --color-focco-blue-dark: var(--focco-blue-dark);
+  --color-focco-blue-pale: var(--focco-blue-pale);
+  --color-focco-orange: var(--focco-orange);
+  --color-focco-orange-dark: var(--focco-orange-dark);
+  --color-focco-orange-pale: var(--focco-orange-pale);
   --color-focco-pink: var(--focco-pink);
+  --color-focco-pink-dark: var(--focco-pink-dark);
+  --color-focco-pink-pale: var(--focco-pink-pale);
+  --color-focco-red: var(--focco-red);
+  --color-focco-red-dark: var(--focco-red-dark);
+  --color-focco-red-pale: var(--focco-red-pale);
   --color-focco-navy: var(--focco-navy);
+  --color-focco-navy-deep: var(--focco-navy-deep);
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family:
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    Helvetica,
-    Arial,
-    sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+}
+
+/* Faixa de assinatura FOCCO: as 4 cores da marca em degradê — usada como
+   detalhe de marca sob cabeçalhos/cartões, ecoando os blocos coloridos das
+   artes oficiais (card_focco.png). */
+.focco-accent-bar {
+  background: linear-gradient(
+    90deg,
+    var(--focco-green) 0%,
+    var(--focco-blue) 33%,
+    var(--focco-orange) 66%,
+    var(--focco-pink) 100%
+  );
 }
