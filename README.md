@@ -113,27 +113,29 @@ Se preferir rodar localmente sem Docker: Postgres 16 acessível via
 ## Deploy em produção (VPS / Docker Swarm)
 
 Duas opções, no mesmo repositório: `docker-compose.prod.yml` (mais simples,
-um único servidor, sem HTTPS automático) ou `docker-stack.yml` (Docker Swarm
-com Traefik na frente, HTTPS automático via Let's Encrypt — recomendado se
-você já tem um domínio apontado pra VPS).
+um único servidor, sem HTTPS automático) ou `docker-stack.yml` (Docker Swarm,
+usando o Traefik que já roda na VPS — HTTPS automático via Let's Encrypt).
 
-### Opção A — Docker Swarm + Traefik (HTTPS automático)
+### Opção A — Docker Swarm (usando o Traefik já existente na VPS)
 
-1. Confirme que o Swarm já está inicializado na VPS (`docker info` mostra
-   `Swarm: active`; se não, `docker swarm init`).
-2. Aponte um registro DNS tipo A do seu domínio para o IP da VPS.
-3. Copie `.env.prod.example` para `.env.prod` e preencha `DB_PASSWORD`,
-   `AUTH_SECRET` (gere com `openssl rand -base64 32`), `DOMAIN` (o domínio do
-   passo 2) e `ACME_EMAIL` (recebe avisos do Let's Encrypt sobre o
-   certificado).
-4. Construa a imagem na própria VPS:
-   ```bash
-   docker build -t sistema_focco:latest .
-   ```
-   (Num Swarm de nó único isso basta — o scheduler usa a imagem local do
-   mesmo host. Num Swarm com vários nós, publique a imagem num registry que
-   todos os nós alcancem, e ajuste `image:` no `docker-stack.yml`.)
-5. Deploy:
+`docker-stack.yml` não sobe um Traefik próprio — ele se conecta ao Traefik
+que já roda na VPS (rede externa `HDSwarmNet`, certresolver
+`letsencryptresolver`), do mesmo jeito que o Portainer já faz. A imagem
+também não é construída na VPS: o GitHub Actions builda e publica no Docker
+Hub a cada push na `main` (ver `.github/workflows/docker-publish.yml`) — a
+VPS só puxa a tag pronta.
+
+1. No GitHub, em Settings > Secrets and variables > Actions do repositório,
+   adicione dois secrets: `DOCKERHUB_USERNAME` (seu usuário do Docker Hub) e
+   `DOCKERHUB_TOKEN` (um access token gerado em Docker Hub > Account
+   Settings > Security > New Access Token — não use a senha da conta).
+2. Dê um push (ou rode o workflow manualmente pela aba Actions) e confirme
+   que a imagem apareceu em `hub.docker.com/r/<seu-usuário>/sistema_focco`.
+3. Aponte um registro DNS tipo A do domínio da aplicação para o IP da VPS.
+4. Copie `.env.prod.example` para `.env.prod` e preencha `DB_PASSWORD`,
+   `AUTH_SECRET` (gere com `openssl rand -base64 32`), `DOMAIN` e
+   `DOCKERHUB_IMAGE` (ex: `seuusuario/sistema_focco:latest`).
+5. Deploy — o Swarm puxa a imagem do Docker Hub automaticamente:
    ```bash
    export $(grep -v '^#' .env.prod | xargs)
    docker stack deploy -c docker-stack.yml focco
@@ -145,10 +147,10 @@ você já tem um domínio apontado pra VPS).
    ```
    O Traefik emite o certificado automaticamente na primeira requisição
    HTTPS — pode levar alguns segundos após o DNS propagar.
-7. Pra atualizar depois de um novo build (ex: `git pull` + rebuild):
+7. Pra atualizar depois de um novo push (a imagem nova já está publicada):
    ```bash
-   docker build -t sistema_focco:latest .
-   docker service update --image sistema_focco:latest --force focco_app
+   export $(grep -v '^#' .env.prod | xargs)
+   docker service update --image $DOCKERHUB_IMAGE --force focco_app
    ```
 
 ### Opção B — `docker compose` simples (sem HTTPS automático)

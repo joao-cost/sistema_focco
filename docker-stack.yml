@@ -1,52 +1,28 @@
-# Stack para Docker Swarm, com HTTPS automático via Traefik + Let's Encrypt.
+# Stack para o Swarm da HDSwarmPrincipal — usa o Traefik JÁ EXISTENTE nessa
+# VPS (rede externa HDSwarmNet, certresolver "letsencryptresolver"), então
+# este stack NÃO sobe um Traefik próprio — só se conecta ao que já roda.
+#
+# A imagem é publicada automaticamente no Docker Hub a cada push na main
+# (ver .github/workflows/docker-publish.yml) — a VPS só puxa a tag, não
+# builda nada localmente.
 #
 # Pré-requisitos:
-#   - Docker Swarm já inicializado na VPS (docker swarm init).
-#   - Domínio (DOMAIN) com um registro A apontando para o IP da VPS.
-#   - Imagem já construída localmente na VPS: docker build -t sistema_focco:latest .
-#     (num Swarm de nó único isso basta — o scheduler usa a imagem local. Num
-#     Swarm multi-nó, publique a imagem num registry acessível pelos nós.)
+#   - Rede externa HDSwarmNet já criada (já está, é usada pelo Portainer/Traefik).
+#   - Domínio DOMAIN com um registro A apontando para o IP da VPS.
+#   - Secrets DOCKERHUB_USERNAME e DOCKERHUB_TOKEN configurados no GitHub
+#     (Settings > Secrets and variables > Actions do repositório).
 #
 # Configuração (arquivo .env.prod na mesma pasta — ver .env.prod.example):
-#   DB_PASSWORD, AUTH_SECRET, DOMAIN, ACME_EMAIL
+#   DB_PASSWORD, AUTH_SECRET, DOMAIN, DOCKERHUB_IMAGE
 #
-# Deploy:
+# Deploy (primeira vez — puxa a imagem do Docker Hub automaticamente):
 #   export $(grep -v '^#' .env.prod | xargs) && \
 #   docker stack deploy -c docker-stack.yml focco
 #
-# Atualizar depois de um novo build de imagem:
-#   docker service update --image sistema_focco:latest --force focco_app
+# Atualizar depois de um novo push (nova imagem já publicada pelo GitHub Actions):
+#   docker service update --image $DOCKERHUB_IMAGE --force focco_app
 
 services:
-  traefik:
-    image: traefik:v3.1
-    command:
-      - --providers.swarm.endpoint=unix:///var/run/docker.sock
-      - --providers.swarm.exposedByDefault=false
-      - --entrypoints.web.address=:80
-      - --entrypoints.websecure.address=:443
-      - --entrypoints.web.http.redirections.entryPoint.to=websecure
-      - --entrypoints.web.http.redirections.entryPoint.scheme=https
-      - --certificatesresolvers.le.acme.httpchallenge=true
-      - --certificatesresolvers.le.acme.httpchallenge.entrypoint=web
-      - --certificatesresolvers.le.acme.email=${ACME_EMAIL:?defina ACME_EMAIL no .env.prod}
-      - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
-    ports:
-      - target: 80
-        published: 80
-        mode: host
-      - target: 443
-        published: 443
-        mode: host
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - focco_letsencrypt:/letsencrypt
-    networks:
-      - focco_public
-    deploy:
-      placement:
-        constraints: [node.role == manager]
-
   db:
     image: postgres:16-alpine
     environment:
@@ -62,7 +38,7 @@ services:
         constraints: [node.role == manager]
 
   app:
-    image: sistema_focco:latest
+    image: ${DOCKERHUB_IMAGE:?defina DOCKERHUB_IMAGE no .env.prod}
     environment:
       DATABASE_URL: postgresql://focco:${DB_PASSWORD:?defina DB_PASSWORD no .env.prod}@db:5432/sistema_focco
       AUTH_SECRET: ${AUTH_SECRET:?defina AUTH_SECRET no .env.prod}
@@ -70,22 +46,25 @@ services:
       AUTH_URL: https://${DOMAIN:?defina DOMAIN no .env.prod}
       NEXT_TELEMETRY_DISABLED: "1"
     networks:
-      - focco_public
+      - HDSwarmNet
       - focco_internal
     deploy:
       labels:
         - traefik.enable=true
         - traefik.http.routers.focco.rule=Host(`${DOMAIN}`)
-        - traefik.http.routers.focco.entrypoints=websecure
-        - traefik.http.routers.focco.tls.certresolver=le
         - traefik.http.services.focco.loadbalancer.server.port=3000
+        - traefik.http.routers.focco.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.focco.service=focco
+        - traefik.docker.network=HDSwarmNet
+        - traefik.http.routers.focco.entrypoints=websecure
 
 networks:
-  focco_public:
-    driver: overlay
+  HDSwarmNet:
+    external: true
+    attachable: true
+    name: HDSwarmNet
   focco_internal:
     driver: overlay
 
 volumes:
   focco_db_data:
-  focco_letsencrypt:
