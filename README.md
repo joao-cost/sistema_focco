@@ -112,26 +112,66 @@ Se preferir rodar localmente sem Docker: Postgres 16 acessível via
 
 ## Deploy em produção (VPS / Docker Swarm)
 
+Duas opções, no mesmo repositório: `docker-compose.prod.yml` (mais simples,
+um único servidor, sem HTTPS automático) ou `docker-stack.yml` (Docker Swarm
+com Traefik na frente, HTTPS automático via Let's Encrypt — recomendado se
+você já tem um domínio apontado pra VPS).
+
+### Opção A — Docker Swarm + Traefik (HTTPS automático)
+
+1. Confirme que o Swarm já está inicializado na VPS (`docker info` mostra
+   `Swarm: active`; se não, `docker swarm init`).
+2. Aponte um registro DNS tipo A do seu domínio para o IP da VPS.
+3. Copie `.env.prod.example` para `.env.prod` e preencha `DB_PASSWORD`,
+   `AUTH_SECRET` (gere com `openssl rand -base64 32`), `DOMAIN` (o domínio do
+   passo 2) e `ACME_EMAIL` (recebe avisos do Let's Encrypt sobre o
+   certificado).
+4. Construa a imagem na própria VPS:
+   ```bash
+   docker build -t sistema_focco:latest .
+   ```
+   (Num Swarm de nó único isso basta — o scheduler usa a imagem local do
+   mesmo host. Num Swarm com vários nós, publique a imagem num registry que
+   todos os nós alcancem, e ajuste `image:` no `docker-stack.yml`.)
+5. Deploy:
+   ```bash
+   export $(grep -v '^#' .env.prod | xargs)
+   docker stack deploy -c docker-stack.yml focco
+   ```
+6. Acompanhe a subida:
+   ```bash
+   docker service ls
+   docker service logs -f focco_app
+   ```
+   O Traefik emite o certificado automaticamente na primeira requisição
+   HTTPS — pode levar alguns segundos após o DNS propagar.
+7. Pra atualizar depois de um novo build (ex: `git pull` + rebuild):
+   ```bash
+   docker build -t sistema_focco:latest .
+   docker service update --image sistema_focco:latest --force focco_app
+   ```
+
+### Opção B — `docker compose` simples (sem HTTPS automático)
+
 1. Copie `.env.prod.example` para `.env.prod` e preencha `DB_PASSWORD`,
-   `AUTH_SECRET` (gere com `openssl rand -base64 32`) e `AUTH_URL`.
+   `AUTH_SECRET` e `AUTH_URL`.
 2. Construa a imagem:
    ```bash
    docker build -t sistema_focco:latest .
    ```
-3. Suba com `docker compose` (mais simples, um único servidor):
+3. Suba:
    ```bash
    docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
    ```
-   Ou, se preferir usar um Swarm já existente na VPS:
-   ```bash
-   export $(grep -v '^#' .env.prod | xargs)
-   docker stack deploy -c docker-compose.prod.yml focco
-   ```
-4. As migrations do banco rodam automaticamente na inicialização do
-   container (`docker-entrypoint.sh`), antes do servidor subir.
-5. Coloque um reverso proxy (Nginx, Traefik ou Caddy) na frente da porta 3000
-   com HTTPS — recomendado pela própria documentação de self-hosting do
+4. Coloque você mesmo um reverso proxy (Nginx, Caddy) na frente da porta
+   3000 com HTTPS — recomendado pela própria documentação de self-hosting do
    Next.js.
+
+### Em ambas as opções
+
+As migrations do banco rodam automaticamente na inicialização do container
+(`docker-entrypoint.sh`), antes do servidor subir — com retentativas
+automáticas caso o Postgres ainda não esteja pronto para aceitar conexões.
 
 ## Deploy em produção (Vercel + Supabase, 100% gratuito)
 
