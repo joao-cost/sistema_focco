@@ -143,7 +143,11 @@ investir numa VPS — tem limitações (ver abaixo) mas roda o app real.
    do banco na criação. Em *Project Settings > Database > Connection string*
    pegue duas strings:
    - **Transaction pooler** (porta 6543) → variável `DATABASE_URL`
-   - **Direct connection** (porta 5432) → variável `DIRECT_URL`
+   - **Session pooler** (porta 5432, mesmo host do pooler) → variável
+     `DIRECT_URL`. **Não use a "Direct connection"** (`db.xxx.supabase.co`) —
+     esse host só resolve em IPv6 e o build da Vercel não tem rota IPv6 de
+     saída (dá `ENETUNREACH`). O Session pooler é IPv4 e suporta DDL/migrations
+     normalmente.
 2. **Importe o repositório na Vercel** (vercel.com > Add New > Project),
    selecionando este repo no GitHub. A Vercel detecta Next.js automaticamente.
 3. **Configure as variáveis de ambiente** do projeto na Vercel
