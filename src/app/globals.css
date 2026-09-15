@@ -9,13 +9,22 @@
 @import "@fontsource/inter/800.css";
 
 :root {
+  color-scheme: light;
   --background: #f6f7f9;
   --foreground: #0f1f3a;
   --surface: #ffffff;
   --border: #e4e7ec;
   --muted: #667085;
+  /* Neutros usados nas telas de tabela/lista (antes hardcoded em várias
+     páginas) — centralizados aqui pra dark mode conseguir sobrescrever. */
+  --text-secondary: #344054;
+  --text-tertiary: #98a2b3;
+  --border-subtle: #f2f4f7;
+  --surface-subtle: #f7f8fa;
 
-  /* Paleta oficial da marca FOCCO (paleta.png) */
+  /* Paleta oficial da marca FOCCO (paleta.png) — cores "vivas" (primary/dark)
+     ficam iguais nos dois temas; só as versões "pale" (fundo claro de faixa/
+     badge) mudam no escuro, ver bloco @media abaixo. */
   --focco-green: #6dbe45;
   --focco-green-dark: #4f9a2e;
   --focco-green-pale: #dff2d6;
@@ -35,12 +44,37 @@
   --focco-navy-deep: #0a1526;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --background: #0b1220;
+    --foreground: #e8edf5;
+    --surface: #121a2c;
+    --border: #263149;
+    --muted: #8a97b0;
+    --text-secondary: #c3cbdb;
+    --text-tertiary: #7c8aa3;
+    --border-subtle: #1c2438;
+    --surface-subtle: #16203350;
+
+    --focco-green-pale: #17301c;
+    --focco-blue-pale: #142a3d;
+    --focco-orange-pale: #332208;
+    --focco-pink-pale: #35182a;
+    --focco-red-pale: #35181c;
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
   --color-border: var(--border);
   --color-muted: var(--muted);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-border-subtle: var(--border-subtle);
+  --color-surface-subtle: var(--surface-subtle);
   --color-focco-green: var(--focco-green);
   --color-focco-green-dark: var(--focco-green-dark);
   --color-focco-green-pale: var(--focco-green-pale);

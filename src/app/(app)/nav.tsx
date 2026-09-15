@@ -7,12 +7,12 @@ import { getModuleAccent, type ModuleKey } from "@/lib/theme";
 import type { UserRole } from "@/auth";
 
 const ALL_LINKS: { href: string; label: string; module: ModuleKey; roles: UserRole[] }[] = [
-  { href: "/coordenacao", label: "Dashboard", module: "dashboard", roles: ["coordenacao"] },
+  { href: "/coordenacao", label: "Dashboard", module: "dashboard", roles: ["coordenacao", "facilitador"] },
   { href: "/celulas", label: "Células", module: "celulas", roles: ["coordenacao", "facilitador", "articulador"] },
   { href: "/bolsistas", label: "Bolsistas", module: "bolsistas", roles: ["coordenacao", "facilitador"] },
   { href: "/chamada", label: "Chamada", module: "chamada", roles: ["coordenacao", "facilitador"] },
   { href: "/avisos", label: "Avisos", module: "avisos", roles: ["coordenacao", "facilitador", "articulador"] },
-  { href: "/usuarios", label: "Usuários", module: "usuarios", roles: ["coordenacao"] },
+  { href: "/usuarios", label: "Usuários", module: "usuarios", roles: ["coordenacao", "facilitador"] },
 ];
 
 export function Nav({ role }: { role: UserRole }) {
@@ -30,7 +30,7 @@ export function Nav({ role }: { role: UserRole }) {
             href={link.href}
             className={cn(
               "rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-              active ? cn(accent.bg, accent.text, "font-semibold") : "text-muted hover:bg-gray-100 hover:text-foreground"
+              active ? cn(accent.bg, accent.text, "font-semibold") : "text-muted hover:bg-border-subtle hover:text-foreground"
             )}
           >
             {link.label}

@@ -30,10 +30,12 @@ export default auth((req) => {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Restringe /coordenacao/** a quem tem papel "coordenacao"
+  // Restringe /coordenacao/** e /usuarios/** a coordenação e facilitador
+  // (articulador não gerencia usuários nem vê o dashboard geral).
+  const staffOnlyPaths = ["/coordenacao", "/usuarios"];
   if (
-    nextUrl.pathname.startsWith("/coordenacao") &&
-    req.auth.user?.role !== "coordenacao"
+    staffOnlyPaths.some((p) => nextUrl.pathname.startsWith(p)) &&
+    !["coordenacao", "facilitador"].includes(req.auth.user?.role ?? "")
   ) {
     return NextResponse.redirect(new URL("/", nextUrl));
   }

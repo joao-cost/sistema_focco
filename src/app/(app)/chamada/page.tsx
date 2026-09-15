@@ -38,10 +38,10 @@ export default async function ChamadaPage({
           {chamadasAnteriores.length === 0 ? (
             <p className="px-[18px] py-6 text-sm text-muted">Nenhuma chamada registrada ainda.</p>
           ) : (
-            <div className="divide-y divide-[#F7F8FA]">
+            <div className="divide-y divide-surface-subtle">
               {chamadasAnteriores.map((c) => (
                 <div key={c.id} className="flex items-center justify-between px-[18px] py-3">
-                  <span className="text-[12.5px] text-[#344054]">{formatDate(c.data)}</span>
+                  <span className="text-[12.5px] text-text-secondary">{formatDate(c.data)}</span>
                   <span className="text-xs font-semibold text-focco-green-dark">
                     {c.presentes}/{c.total}
                   </span>

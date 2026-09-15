@@ -57,7 +57,7 @@ export function LoginForm({
       <div className="pt-1 text-center">
         <Link
           href="/vitrine"
-          className={cn("text-xs", isMobile ? "text-white/55 hover:text-white/80" : "text-[#98A2B3] hover:text-muted")}
+          className={cn("text-xs", isMobile ? "text-white/55 hover:text-white/80" : "text-text-tertiary hover:text-muted")}
         >
           Ver a vitrine pública das células →
         </Link>

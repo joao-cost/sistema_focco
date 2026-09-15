@@ -54,7 +54,7 @@ export function ChamadaForm({ data, bolsistas }: { data: string; bolsistas: Bols
         {bolsistas.length === 0 ? (
           <p className="px-[18px] py-6 text-sm text-muted">Nenhum bolsista ativo no momento.</p>
         ) : (
-          <div className="divide-y divide-[#F7F8FA]">
+          <div className="divide-y divide-surface-subtle">
             {bolsistas.map((b) => {
               const presente = presencas[b.bolsaId];
               return (
@@ -63,7 +63,7 @@ export function ChamadaForm({ data, bolsistas }: { data: string; bolsistas: Bols
                     <Avatar name={b.nome} accent="bolsistas" />
                     <div className="min-w-0">
                       <p className="m-0 truncate text-[13px] font-semibold text-foreground">{b.nome}</p>
-                      <p className="m-0 truncate text-[11px] text-[#98A2B3]">{b.celulaNome ?? "—"}</p>
+                      <p className="m-0 truncate text-[11px] text-text-tertiary">{b.celulaNome ?? "—"}</p>
                     </div>
                   </div>
                   <input type="hidden" name={`presente_${b.bolsaId}`} value={presente ? "on" : ""} />
@@ -72,7 +72,7 @@ export function ChamadaForm({ data, bolsistas }: { data: string; bolsistas: Bols
                     onClick={() => setPresencas((s) => ({ ...s, [b.bolsaId]: !s[b.bolsaId] }))}
                     className={cn(
                       "rounded-full px-4 py-1.5 text-xs font-semibold transition-colors",
-                      presente ? "bg-focco-green-pale text-focco-green-dark" : "bg-gray-100 text-gray-600"
+                      presente ? "bg-focco-green-pale text-focco-green-dark" : "bg-border-subtle text-text-secondary"
                     )}
                   >
                     {presente ? "Presente" : "Ausente"}

@@ -6,13 +6,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const session = await verifySession();
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar
         role={session.user.role}
         userName={session.user.name}
         roleLabel={ROLE_LABELS[session.user.role]}
       />
-      <main className="min-w-0 flex-1 overflow-y-auto px-9 py-16">{children}</main>
+      <main className="h-full min-w-0 flex-1 overflow-y-auto px-4 py-16 sm:px-9">{children}</main>
     </div>
   );
 }

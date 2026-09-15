@@ -5,7 +5,7 @@ import { EncontrosChart } from "@/components/encontros-chart";
 import { formatDate } from "@/lib/utils";
 
 export default async function CoordenacaoDashboardPage() {
-  await requireRole("coordenacao");
+  await requireRole("coordenacao", "facilitador");
   const stats = await getDashboardStats();
 
   return (

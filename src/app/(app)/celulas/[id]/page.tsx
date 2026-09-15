@@ -55,7 +55,7 @@ export default async function CelulaDetailPage({
 
       <div className="grid items-start gap-[18px] lg:grid-cols-2">
         <Card>
-          <div className={cn(theme.bg, "border-b border-[#F2F4F7] px-[18px] py-4")}>
+          <div className={cn(theme.bg, "border-b border-border-subtle px-[18px] py-4")}>
             <p className={cn(theme.text, "m-0 text-sm font-bold")}>Celulandos</p>
             <p className={cn(theme.text, "mt-0.5 text-[11.5px]")}>
               {celulandosAtivos} ativo(s) de {celula.celulandos.length} cadastrados
@@ -67,14 +67,14 @@ export default async function CelulaDetailPage({
         </Card>
 
         <Card>
-          <div className={cn(theme.bg, "border-b border-[#F2F4F7] px-[18px] py-4")}>
+          <div className={cn(theme.bg, "border-b border-border-subtle px-[18px] py-4")}>
             <p className={cn(theme.text, "m-0 text-sm font-bold")}>Histórico de encontros</p>
             <p className={cn(theme.text, "mt-0.5 text-[11.5px]")}>Registro de presença por encontro.</p>
           </div>
           {celula.encontros.length === 0 ? (
             <p className="px-5 py-6 text-sm text-muted">Nenhum encontro registrado ainda.</p>
           ) : (
-            <div className="divide-y divide-[#F7F8FA]">
+            <div className="divide-y divide-surface-subtle">
               {celula.encontros.map((e) => {
                 const presentes = e.presencas.filter((p) => p.presente).length;
                 const total = e.presencas.length;
@@ -88,10 +88,10 @@ export default async function CelulaDetailPage({
                       </span>
                     </div>
                     {e.conteudoTrabalhado && <p className="m-0 text-[11.5px] text-muted">{e.conteudoTrabalhado}</p>}
-                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[#F2F4F7]">
+                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-border-subtle">
                       <div className="h-full rounded-full bg-focco-green" style={{ width: `${pct}%` }} />
                     </div>
-                    <p className="mt-1.5 text-[11px] text-[#98A2B3]">Registrado por {e.registradoPor.name}</p>
+                    <p className="mt-1.5 text-[11px] text-text-tertiary">Registrado por {e.registradoPor.name}</p>
                   </div>
                 );
               })}
@@ -102,7 +102,7 @@ export default async function CelulaDetailPage({
 
       <div className="mt-[18px] grid items-start gap-[18px] lg:grid-cols-2">
         <Card>
-          <div className="border-b border-[#F2F4F7] px-[18px] py-4">
+          <div className="border-b border-border-subtle px-[18px] py-4">
             <p className="m-0 text-sm font-bold text-foreground">Dados da célula</p>
           </div>
           <dl className="space-y-2 px-[18px] py-4 text-sm">
@@ -140,7 +140,7 @@ export default async function CelulaDetailPage({
         </Card>
 
         <Card>
-          <div className="border-b border-[#F2F4F7] px-[18px] py-4">
+          <div className="border-b border-border-subtle px-[18px] py-4">
             <p className="m-0 text-sm font-bold text-foreground">Avisos temporários</p>
             <p className="mt-0.5 text-[11.5px] text-muted">Trocas de sala, cancelamentos e exceções pontuais.</p>
           </div>

@@ -53,8 +53,8 @@ const BUTTON_SIZES = {
 const BUTTON_VARIANTS = {
   primary:
     "bg-focco-green text-white shadow-sm shadow-focco-green/20 hover:bg-focco-green-dark",
-  secondary: "border border-border bg-surface text-foreground hover:bg-gray-50",
-  ghost: "text-foreground hover:bg-gray-100",
+  secondary: "border border-border bg-surface text-foreground hover:bg-border-subtle",
+  ghost: "text-foreground hover:bg-border-subtle",
   danger: "bg-focco-red text-white shadow-sm shadow-focco-red/20 hover:bg-focco-red-dark",
 } as const;
 
@@ -157,15 +157,15 @@ export function Field({
 const BADGE_STYLES: Record<string, string> = {
   ativa: "bg-focco-green-pale text-focco-green-dark",
   ativo: "bg-focco-green-pale text-focco-green-dark",
-  inativa: "bg-gray-100 text-gray-700",
-  inativo: "bg-gray-100 text-gray-700",
-  encerrada: "bg-gray-200 text-gray-600",
+  inativa: "bg-border-subtle text-text-secondary",
+  inativo: "bg-border-subtle text-text-secondary",
+  encerrada: "bg-border-subtle text-text-secondary",
   desistente: "bg-focco-red-pale text-focco-red-dark",
   coordenacao: "bg-focco-blue-pale text-focco-blue-dark",
   facilitador: "bg-focco-orange-pale text-focco-orange-dark",
   articulador: "bg-focco-green-pale text-focco-green-dark",
   suspenso: "bg-focco-orange-pale text-focco-orange-dark",
-  encerrado: "bg-gray-100 text-gray-700",
+  encerrado: "bg-border-subtle text-text-secondary",
   completa: "bg-focco-green-pale text-focco-green-dark",
   pendente: "bg-focco-pink-pale text-focco-pink-dark",
   entregue: "bg-focco-green-pale text-focco-green-dark",
@@ -178,7 +178,7 @@ export function Badge({ value, label }: { value: string; label: string }) {
     <span
       className={cn(
         "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold",
-        BADGE_STYLES[value] ?? "bg-gray-100 text-gray-700"
+        BADGE_STYLES[value] ?? "bg-border-subtle text-text-secondary"
       )}
     >
       {label}

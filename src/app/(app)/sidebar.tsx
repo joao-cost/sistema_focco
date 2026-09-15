@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Nav } from "./nav";
 import { logoutAction } from "./logout-action";
@@ -19,6 +19,17 @@ export function Sidebar({
   roleLabel: string;
 }) {
   const [open, setOpen] = useState(true);
+
+  // Em telas pequenas (celular), a sidebar começa fechada — evita o
+  // conteúdo aparecer espremido na primeira renderização. Não dá pra saber
+  // a largura da tela no server-render (SSR sempre assume desktop, senão
+  // o HTML do servidor diverge do cliente), então ajusta uma única vez
+  // logo após montar no navegador — daqui pra frente não persegue
+  // redimensionamento em tempo real.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- ajuste único pós-hidratação a partir de window.innerWidth, sem isso não dá pra saber a largura da tela no SSR
+    if (window.innerWidth < 768) setOpen(false);
+  }, []);
 
   return (
     <>

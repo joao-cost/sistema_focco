@@ -25,7 +25,7 @@ export async function createUserAction(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  await requireRole("coordenacao");
+  await requireRole("coordenacao", "facilitador");
 
   const result = userSchema.safeParse({
     name: formData.get("name"),
@@ -78,7 +78,7 @@ export async function createUserAction(
 }
 
 export async function setUserActiveAction(userId: string, ativo: boolean) {
-  await requireRole("coordenacao");
+  await requireRole("coordenacao", "facilitador");
   await db.update(users).set({ ativo, updatedAt: new Date() }).where(eq(users.id, userId));
   revalidatePath("/usuarios");
 }
@@ -89,7 +89,7 @@ export async function setUserActiveAction(userId: string, ativo: boolean) {
  * e manda um link de definição de senha pro e-mail do usuário.
  */
 export async function resetUserPasswordAction(userId: string) {
-  await requireRole("coordenacao");
+  await requireRole("coordenacao", "facilitador");
 
   const [user] = await db
     .select({ id: users.id, name: users.name, email: users.email })

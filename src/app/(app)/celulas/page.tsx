@@ -58,20 +58,20 @@ export default async function CelulasPage() {
               </thead>
               <tbody>
                 {celulas.map((c) => (
-                  <tr key={c.id} className="border-b border-[#F2F4F7] last:border-0 hover:bg-gray-50">
+                  <tr key={c.id} className="border-b border-border-subtle last:border-0 hover:bg-border-subtle">
                     <td className="px-5 py-3.5">
                       <Link href={`/celulas/${c.id}`} className="font-semibold text-foreground hover:text-focco-blue">
                         {c.nome}
                       </Link>
                       {c.tema && <p className="text-xs text-muted">{c.tema}</p>}
                     </td>
-                    <td className="px-5 py-3.5 text-[#344054]">{c.articuladorNome}</td>
-                    <td className="px-5 py-3.5 text-[#344054]">
+                    <td className="px-5 py-3.5 text-text-secondary">{c.articuladorNome}</td>
+                    <td className="px-5 py-3.5 text-text-secondary">
                       {c.diaSemana ? DIA_SEMANA_LABELS[c.diaSemana] : "—"}
                       {c.turno ? ` · ${TURNO_LABELS[c.turno]}` : ""}
                       {c.horario ? ` · ${c.horario}` : ""}
                     </td>
-                    <td className="px-5 py-3.5 text-[#344054]">{c.local ?? "—"}</td>
+                    <td className="px-5 py-3.5 text-text-secondary">{c.local ?? "—"}</td>
                     <td className="px-5 py-3.5">
                       <Badge value={c.status} label={CELULA_STATUS_LABELS[c.status]} />
                     </td>

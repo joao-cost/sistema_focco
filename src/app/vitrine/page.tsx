@@ -87,7 +87,7 @@ export default async function VitrinePage() {
                   {c.descricaoPublica && (
                     <p className="m-0 text-[11.5px] leading-relaxed text-muted">{c.descricaoPublica}</p>
                   )}
-                  <p className="mt-1 text-[11px] text-[#98A2B3]">
+                  <p className="mt-1 text-[11px] text-text-tertiary">
                     {c.diaSemana ? DIA_SEMANA_LABELS[c.diaSemana] : "—"}
                     {c.turno ? ` · ${TURNO_LABELS[c.turno]}` : ""}
                     {c.horario ? ` · ${c.horario}` : ""}

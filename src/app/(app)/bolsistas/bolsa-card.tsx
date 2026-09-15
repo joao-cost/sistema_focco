@@ -56,23 +56,23 @@ export function BolsaCard({ bolsa }: { bolsa: Bolsa }) {
 
       <div className="grid grid-cols-1 gap-4 px-[18px] py-4 sm:grid-cols-3">
         <div>
-          <p className="m-0 mb-1 text-[10.5px] font-bold uppercase tracking-wide text-[#98A2B3]">Vigência</p>
-          <p className="m-0 text-[12.5px] text-[#344054]">
+          <p className="m-0 mb-1 text-[10.5px] font-bold uppercase tracking-wide text-text-tertiary">Vigência</p>
+          <p className="m-0 text-[12.5px] text-text-secondary">
             {formatDate(bolsa.vigenciaInicio)} – {formatDate(bolsa.vigenciaFim)}
           </p>
         </div>
         <div>
-          <p className="m-0 mb-1 text-[10.5px] font-bold uppercase tracking-wide text-[#98A2B3]">Documentação</p>
+          <p className="m-0 mb-1 text-[10.5px] font-bold uppercase tracking-wide text-text-tertiary">Documentação</p>
           <Badge value={bolsa.documentacaoStatus} label={DOCUMENTACAO_STATUS_LABELS[bolsa.documentacaoStatus]} />
         </div>
         <div>
-          <p className="m-0 mb-1 text-[10.5px] font-bold uppercase tracking-wide text-[#98A2B3]">Relatórios</p>
+          <p className="m-0 mb-1 text-[10.5px] font-bold uppercase tracking-wide text-text-tertiary">Relatórios</p>
           <Badge value={bolsa.relatoriosStatus} label={RELATORIO_STATUS_LABELS[bolsa.relatoriosStatus]} />
         </div>
       </div>
 
       <div className="px-[18px] pb-4">
-        <p className="m-0 mb-2 text-[10.5px] font-bold uppercase tracking-wide text-[#98A2B3]">
+        <p className="m-0 mb-2 text-[10.5px] font-bold uppercase tracking-wide text-text-tertiary">
           Histórico de relatórios
         </p>
         <div className="flex flex-wrap gap-2">
@@ -83,7 +83,7 @@ export function BolsaCard({ bolsa }: { bolsa: Bolsa }) {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 border-t border-[#F2F4F7] px-[18px] py-3">
+      <div className="flex flex-wrap items-center gap-2 border-t border-border-subtle px-[18px] py-3">
         {STATUS_OPTIONS.filter((s) => s !== bolsa.status).map((s) => (
           <form key={s} action={setBolsaStatusAction.bind(null, bolsa.id, s)}>
             <Button type="submit" variant="secondary" size="sm">
@@ -108,7 +108,7 @@ export function BolsaCard({ bolsa }: { bolsa: Bolsa }) {
       </div>
 
       {showRelatorioForm && (
-        <div className="border-t border-[#F2F4F7] px-[18px] py-3.5">
+        <div className="border-t border-border-subtle px-[18px] py-3.5">
           <RelatorioForm bolsaId={bolsa.id} />
         </div>
       )}
