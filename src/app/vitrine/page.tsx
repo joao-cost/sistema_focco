@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import { listVitrineCelulas } from "@/lib/queries/vitrine";
 import { DIA_SEMANA_LABELS, TURNO_LABELS, cn } from "@/lib/utils";
 
@@ -21,11 +20,15 @@ export default async function VitrinePage() {
 
   return (
     <div className="bg-white">
-      <div className="flex items-center justify-between bg-focco-navy px-6 py-4 sm:px-10">
+      {/*
+        Sem link de login aqui de propósito — essa página é pública e pode
+        ser servida em focco.hyperdynamis.com (domínio 100% público, sem
+        nenhuma rota do sistema acessível). A equipe acessa o sistema pelo
+        link direto (convite por e-mail, favorito salvo), não por um botão
+        visível pra qualquer visitante.
+      */}
+      <div className="flex items-center justify-center bg-focco-navy px-6 py-4 sm:px-10">
         <Image src="/brand/logo-focco.png" alt="FOCCO" width={160} height={56} priority className="h-10 w-auto" />
-        <Link href="/login" className="text-xs font-semibold text-white/70 hover:text-white">
-          Acessar o sistema →
-        </Link>
       </div>
       <div className="focco-accent-bar h-[5px]" />
 

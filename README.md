@@ -171,9 +171,16 @@ VPS só puxa a tag pronta.
 2. Dê um push (ou rode o workflow manualmente pela aba Actions) e confirme
    que a imagem apareceu em `hub.docker.com/r/<seu-usuário>/sistema_focco`.
 3. Aponte um registro DNS tipo A do domínio da aplicação para o IP da VPS.
+   Opcionalmente, aponte também um segundo domínio (`PUBLIC_DOMAIN`) pro
+   mesmo IP — ele serve **só** a vitrine pública de células (`/vitrine`),
+   sem nenhuma outra rota do sistema acessível por ele (nem `/login`,
+   mesmo digitando a URL direto — ver `src/proxy.ts`). Sem definir
+   `PUBLIC_DOMAIN`, a vitrine continua acessível normalmente em
+   `<DOMAIN>/vitrine`, só não tem esse domínio próprio.
 4. Copie `.env.prod.example` para `.env.prod` e preencha `DB_PASSWORD`,
-   `AUTH_SECRET` (gere com `openssl rand -base64 32`), `DOMAIN` e
-   `DOCKERHUB_IMAGE` (ex: `seuusuario/sistema_focco:latest`).
+   `AUTH_SECRET` (gere com `openssl rand -base64 32`), `DOMAIN`,
+   `PUBLIC_DOMAIN` (opcional) e `DOCKERHUB_IMAGE` (ex:
+   `seuusuario/sistema_focco:latest`).
 5. Deploy — o Swarm puxa a imagem do Docker Hub automaticamente:
    ```bash
    export $(grep -v '^#' .env.prod | xargs)

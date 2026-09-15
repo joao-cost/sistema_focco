@@ -3,8 +3,22 @@ import { NextResponse } from "next/server";
 
 const PUBLIC_PATHS = ["/login", "/esqueci-senha", "/redefinir-senha", "/vitrine"];
 
+// Domínio público da vitrine (focco.hyperdynamis.com) — mesma aplicação,
+// mesmo deploy, mas só a vitrine é servida ali: nenhuma outra rota (nem
+// /login) fica acessível nesse host, mesmo por URL direta. A equipe acessa
+// o sistema pelo domínio "de verdade" (DOMAIN / AUTH_URL), não por um link
+// visível na vitrine pública.
+const PUBLIC_DOMAIN = process.env.PUBLIC_DOMAIN;
+
 export default auth((req) => {
   const { nextUrl } = req;
+  const host = req.headers.get("host")?.split(":")[0];
+
+  if (PUBLIC_DOMAIN && host === PUBLIC_DOMAIN) {
+    if (nextUrl.pathname === "/vitrine") return NextResponse.next();
+    return NextResponse.rewrite(new URL("/vitrine", nextUrl));
+  }
+
   const isPublic = PUBLIC_PATHS.some((p) => nextUrl.pathname.startsWith(p));
   const isApiAuth = nextUrl.pathname.startsWith("/api/auth");
 

@@ -15,6 +15,12 @@
 # Configuração (arquivo .env.prod na mesma pasta — ver .env.prod.example):
 #   DB_PASSWORD, AUTH_SECRET, DOMAIN, DOCKERHUB_IMAGE
 #
+# PUBLIC_DOMAIN (opcional): domínio separado, 100% público, que serve só a
+# vitrine de células (/vitrine) — nenhuma outra rota (nem /login) fica
+# acessível por ele, mesmo digitando a URL direto (ver src/proxy.ts). Se não
+# definir, esse segundo router do Traefik fica com uma regra que nunca bate
+# com tráfego real, sem quebrar nada.
+#
 # Deploy (primeira vez — puxa a imagem do Docker Hub automaticamente):
 #   export $(grep -v '^#' .env.prod | xargs) && \
 #   docker stack deploy -c docker-stack.yml focco
@@ -50,6 +56,7 @@ services:
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
       EMAIL_FROM: ${EMAIL_FROM:-}
+      PUBLIC_DOMAIN: ${PUBLIC_DOMAIN:-}
     networks:
       - HDSwarmNet
       - focco_internal
@@ -62,6 +69,12 @@ services:
         - traefik.http.routers.focco.service=focco
         - traefik.docker.network=HDSwarmNet
         - traefik.http.routers.focco.entrypoints=websecure
+        # Segunda rota, mesma imagem/serviço — só a vitrine pública (ver
+        # PUBLIC_DOMAIN acima). Fallback inofensivo se não estiver definida.
+        - traefik.http.routers.focco-public.rule=Host(`${PUBLIC_DOMAIN:-nao-configurado.invalid}`)
+        - traefik.http.routers.focco-public.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.focco-public.service=focco
+        - traefik.http.routers.focco-public.entrypoints=websecure
 
 networks:
   HDSwarmNet:
