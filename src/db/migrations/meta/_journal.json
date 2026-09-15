@@ -36,6 +36,13 @@
       "when": 1789454752596,
       "tag": "0004_narrow_blue_marvel",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789457257059,
+      "tag": "0005_secret_hellion",
+      "breakpoints": true
     }
   ]
 }

@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
   // "ENOENT: next-server.js.nft.json" no build). A Vercel define a env var
   // VERCEL=1 automaticamente durante o build.
   ...(process.env.VERCEL ? {} : { output: "standalone" as const }),
+  experimental: {
+    // Padrão do Next.js é 1MB — pouco pra upload de foto de perfil (ver
+    // src/lib/actions/profile.ts, limite próprio de 3MB).
+    serverActions: { bodySizeLimit: "4mb" },
+  },
 };
 
 export default nextConfig;

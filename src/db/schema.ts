@@ -59,6 +59,7 @@ export const users = pgTable("users", {
   role: userRoleEnum("role").notNull().default("articulador"),
   curso: varchar("curso", { length: 255 }),
   telefone: varchar("telefone", { length: 30 }),
+  avatarUrl: varchar("avatar_url", { length: 500 }),
   ativo: boolean("ativo").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()

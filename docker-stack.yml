@@ -60,7 +60,15 @@ services:
     networks:
       - HDSwarmNet
       - focco_internal
+    volumes:
+      # Fotos de perfil dos usuários (ver /perfil) — precisa ser volume
+      # nomeado (não perde no redeploy) e o serviço fica preso no manager
+      # (mesmo motivo do "db": volume nomeado é local ao nó, se o container
+      # mudasse de nó "perderia" o que já tinha sido enviado nesse nó).
+      - focco_uploads:/app/public/uploads
     deploy:
+      placement:
+        constraints: [node.role == manager]
       labels:
         - traefik.enable=true
         - traefik.http.routers.focco.rule=Host(`${DOMAIN}`)
@@ -86,3 +94,4 @@ networks:
 
 volumes:
   focco_db_data:
+  focco_uploads:

@@ -66,6 +66,22 @@ export const chamadaSchema = z.object({
   data: z.iso.date("Informe a data da reunião."),
 });
 
+export const profileSchema = z.object({
+  name: z.string().trim().min(3, "Informe seu nome."),
+  telefone: z.string().trim().optional().or(z.literal("")),
+});
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Informe sua senha atual."),
+    newPassword: z.string().min(6, "A nova senha deve ter ao menos 6 caracteres."),
+    confirmPassword: z.string().min(1, "Confirme a nova senha."),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "As senhas não coincidem.",
+    path: ["confirmPassword"],
+  });
+
 export const requestPasswordResetSchema = z.object({
   email: z.email("E-mail inválido."),
 });

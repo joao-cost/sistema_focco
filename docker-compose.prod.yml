@@ -41,8 +41,11 @@ services:
       EMAIL_FROM: ${EMAIL_FROM:-}
     ports:
       - "3000:3000"
+    volumes:
+      - focco_uploads:/app/public/uploads
     depends_on:
       - db
 
 volumes:
   focco_db_data:
+  focco_uploads:

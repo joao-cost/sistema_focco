@@ -15,7 +15,7 @@ const ALL_LINKS: { href: string; label: string; module: ModuleKey; roles: UserRo
   { href: "/usuarios", label: "Usuários", module: "usuarios", roles: ["coordenacao", "facilitador"] },
 ];
 
-export function Nav({ role }: { role: UserRole }) {
+export function Nav({ role, onNavigate }: { role: UserRole; onNavigate?: () => void }) {
   const pathname = usePathname();
   const links = ALL_LINKS.filter((l) => l.roles.includes(role));
 
@@ -28,6 +28,7 @@ export function Nav({ role }: { role: UserRole }) {
           <Link
             key={link.href}
             href={link.href}
+            onClick={onNavigate}
             className={cn(
               "rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
               active ? cn(accent.bg, accent.text, "font-semibold") : "text-muted hover:bg-border-subtle hover:text-foreground"

@@ -298,10 +298,13 @@ const AVATAR_ACCENTS: Record<string, string> = {
 export function Avatar({
   name,
   accent = "usuarios",
+  imageUrl,
   className,
 }: {
   name: string;
   accent?: keyof typeof AVATAR_ACCENTS;
+  /** Foto de perfil, se o usuário tiver uma — sem isso, mostra as iniciais. */
+  imageUrl?: string | null;
   className?: string;
 }) {
   const initials = name
@@ -311,6 +314,17 @@ export function Avatar({
     .map((w) => w[0])
     .join("")
     .toUpperCase();
+
+  if (imageUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- avatar de usuário, tamanho fixo pequeno, não vale o overhead do otimizador de imagem do Next pra isso
+      <img
+        src={imageUrl}
+        alt={name}
+        className={cn("h-7 w-7 flex-shrink-0 rounded-full object-cover", className)}
+      />
+    );
+  }
 
   return (
     <div
