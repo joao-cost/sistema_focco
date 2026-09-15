@@ -1,16 +1,25 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { loginAction } from "./actions";
-import { Button, Field, Input, FormError } from "@/components/ui";
+import { Field, Input, FormError } from "@/components/ui";
+import { cn } from "@/lib/utils";
 
-export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
+export function LoginForm({
+  callbackUrl,
+  variant = "desktop",
+}: {
+  callbackUrl: string;
+  variant?: "desktop" | "mobile";
+}) {
   const [state, formAction, pending] = useActionState(loginAction, undefined);
+  const isMobile = variant === "mobile";
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} className={isMobile ? "space-y-3" : "space-y-4"}>
       <input type="hidden" name="callbackUrl" value={callbackUrl} />
-      <Field label="E-mail" htmlFor="email">
+      <Field label={isMobile ? "E-mail" : "E-mail institucional"} htmlFor="email">
         <Input
           id="email"
           name="email"
@@ -29,10 +38,24 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
           required
         />
       </Field>
+      <div className="text-right">
+        <Link href="/esqueci-senha" className="text-xs font-medium text-focco-blue hover:underline">
+          Esqueci minha senha
+        </Link>
+      </div>
       <FormError message={state?.error} />
-      <Button type="submit" className="w-full" size="lg" disabled={pending}>
+      <button
+        type="submit"
+        disabled={pending}
+        className={cn(
+          "w-full rounded-lg py-3 text-center text-sm font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-60",
+          isMobile ? "bg-focco-blue hover:bg-focco-blue-dark" : "bg-focco-green hover:bg-focco-green-dark"
+        )}
+      >
         {pending ? "Entrando..." : "Entrar"}
-      </Button>
+      </button>
+      {/* "Ver a vitrine pública" (link do protótipo) fica pra quando a rota
+          /vitrine existir de verdade — Fase 4 do handoff de design. */}
     </form>
   );
 }

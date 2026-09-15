@@ -1,8 +1,10 @@
 "use client";
 
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, Cell, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-const SERIES_COLOR = "#2a78d6"; // azul — hue sequencial única (uma série, sem legenda)
+// Cores da marca FOCCO, ciclando por barra — mesma lógica do protótipo
+// (gráfico "Encontros por célula" do dashboard).
+const BAR_COLORS = ["#6DBE45", "#2E86C1", "#F39C12", "#E91E63", "#D82435"];
 const GRID_COLOR = "#e4e7ec";
 const TEXT_COLOR = "#667085";
 
@@ -32,8 +34,12 @@ export function EncontrosChart({ data }: { data: Datum[] }) {
           axisLine={false}
           tickLine={false}
         />
-        <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(42,120,214,0.06)" }} />
-        <Bar dataKey="total" fill={SERIES_COLOR} radius={[0, 4, 4, 0]} barSize={18} />
+        <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(15,31,58,0.04)" }} />
+        <Bar dataKey="total" radius={[0, 4, 4, 0]} barSize={18}>
+          {data.map((entry, i) => (
+            <Cell key={entry.nome} fill={BAR_COLORS[i % BAR_COLORS.length]} />
+          ))}
+        </Bar>
       </BarChart>
     </ResponsiveContainer>
   );

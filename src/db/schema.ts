@@ -69,6 +69,38 @@ export const users = pgTable("users", {
 });
 
 // ---------------------------------------------------------------------------
+// Tokens de redefinição/definição de senha (link enviado por e-mail)
+// ---------------------------------------------------------------------------
+
+/**
+ * Usado tanto pra "esqueci minha senha" quanto pra "defina sua senha" no
+ * convite de um usuário novo — mesmo mecanismo, textos de e-mail diferentes.
+ * Guarda o hash (sha256) do token, nunca o valor em texto puro.
+ */
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  tokenHash: varchar("token_hash", { length: 64 }).notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  usedAt: timestamp("used_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const passwordResetTokensRelations = relations(
+  passwordResetTokens,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [passwordResetTokens.userId],
+      references: [users.id],
+    }),
+  })
+);
+
+// ---------------------------------------------------------------------------
 // Células
 // ---------------------------------------------------------------------------
 

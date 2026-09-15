@@ -82,6 +82,38 @@ export async function listAllAvisos() {
   });
 }
 
+/**
+ * Articulador + facilitadores (ativos) de uma célula — usado pra notificar
+ * por e-mail quando um aviso temporário é criado.
+ */
+export async function getCelulaRecipients(celulaId: string) {
+  const celula = await db.query.celulas.findFirst({
+    where: eq(celulas.id, celulaId),
+    columns: { nome: true },
+    with: {
+      articulador: { columns: { name: true, email: true, ativo: true } },
+      facilitadores: {
+        with: { facilitador: { columns: { name: true, email: true, ativo: true } } },
+      },
+    },
+  });
+  if (!celula) return { celulaNome: null as string | null, recipients: [] as { name: string; email: string }[] };
+
+  const candidates = [
+    celula.articulador,
+    ...celula.facilitadores.map((cf) => cf.facilitador),
+  ].filter((u): u is { name: string; email: string; ativo: boolean } => !!u && u.ativo);
+
+  const seen = new Set<string>();
+  const recipients = candidates.filter((u) => {
+    if (seen.has(u.email)) return false;
+    seen.add(u.email);
+    return true;
+  });
+
+  return { celulaNome: celula.nome, recipients };
+}
+
 export async function listFacilitadores() {
   return db
     .select({ id: users.id, name: users.name })

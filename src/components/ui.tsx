@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import type { ButtonHTMLAttributes, InputHTMLAttributes, LabelHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
+import { getModuleTheme, type ModuleKey } from "@/lib/theme";
 
 export function Card({
   className,
@@ -12,7 +13,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-border bg-surface shadow-sm shadow-black/[0.03]",
+        "rounded-xl border border-border bg-surface shadow-sm shadow-black/[0.03]",
         className
       )}
     >
@@ -69,7 +70,7 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100",
+        "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100",
         BUTTON_SIZES[size],
         BUTTON_VARIANTS[variant],
         className
@@ -96,7 +97,7 @@ export function LinkButton({
     <Link
       href={href}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all active:scale-[0.98]",
+        "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all active:scale-[0.98]",
         BUTTON_SIZES[size],
         BUTTON_VARIANTS[variant],
         className
@@ -108,7 +109,7 @@ export function LinkButton({
 }
 
 const FIELD_BASE =
-  "w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted transition-colors focus:border-focco-blue focus:outline-none focus:ring-2 focus:ring-focco-blue/25";
+  "w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted transition-colors focus:border-focco-blue focus:outline-none focus:ring-2 focus:ring-focco-blue/25";
 
 export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
   return <input className={cn(FIELD_BASE, className)} {...props} />;
@@ -221,6 +222,125 @@ export function StatTile({
       <p className="mt-1 text-3xl font-bold tracking-tight text-foreground">{value}</p>
       {description && <p className="mt-1 text-xs text-muted">{description}</p>}
     </Card>
+  );
+}
+
+/**
+ * Faixa de cabeçalho de página, temática por módulo — fundo pálido (ou
+ * gradiente multicolor no dashboard) + formas abstratas decorativas + barra
+ * de gradiente da marca. Ver design_handoff_sistema_focco/README.md.
+ */
+export function PageHeaderBand({
+  module,
+  title,
+  description,
+  badge,
+}: {
+  module: ModuleKey;
+  title: string;
+  description?: string;
+  /** Ex.: badge de status ao lado do título (detalhe de célula). */
+  badge?: React.ReactNode;
+}) {
+  const theme = getModuleTheme(module);
+  const isDashboard = module === "dashboard";
+
+  return (
+    <div
+      className={cn(
+        "relative mb-5 overflow-hidden rounded-2xl p-6",
+        isDashboard
+          ? "bg-gradient-to-r from-focco-green-pale via-focco-blue-pale to-focco-pink-pale"
+          : theme.bg
+      )}
+    >
+      <span
+        aria-hidden
+        className={cn("absolute -top-8 -right-7 h-32 w-32 rotate-[18deg] rounded-[30px] opacity-15", theme.decor[0])}
+      />
+      <span
+        aria-hidden
+        className={cn("absolute -bottom-11 left-[10%] h-40 w-40 -rotate-[14deg] rounded-[36px] opacity-15", theme.decor[1])}
+      />
+      <span
+        aria-hidden
+        className={cn("absolute top-[30%] -left-4 h-16 w-16 rotate-[12deg] rounded-[18px] opacity-15", theme.decor[2])}
+      />
+      <div className="relative z-10">
+        <div className="flex items-center gap-3">
+          <h1 className={cn("text-xl font-bold", isDashboard ? "text-foreground" : theme.text)}>{title}</h1>
+          {badge}
+        </div>
+        {description && (
+          <p className={cn("mt-1 mb-3.5 text-sm", isDashboard ? "text-foreground/75" : theme.text)}>
+            {description}
+          </p>
+        )}
+        <div className="focco-accent-bar h-[3px] w-[72px] rounded-full" />
+      </div>
+    </div>
+  );
+}
+
+const AVATAR_ACCENTS: Record<string, string> = {
+  celulas: "bg-focco-blue-pale text-focco-blue-dark",
+  bolsistas: "bg-focco-pink-pale text-focco-pink-dark",
+  usuarios: "bg-focco-blue-pale text-focco-blue-dark",
+};
+
+export function Avatar({
+  name,
+  accent = "usuarios",
+  className,
+}: {
+  name: string;
+  accent?: keyof typeof AVATAR_ACCENTS;
+  className?: string;
+}) {
+  const initials = name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+
+  return (
+    <div
+      className={cn(
+        "flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-[10.5px] font-bold",
+        AVATAR_ACCENTS[accent],
+        className
+      )}
+    >
+      {initials}
+    </div>
+  );
+}
+
+const STAT_CARD_ACCENTS = {
+  verde: "bg-focco-green-pale text-focco-green-dark",
+  azul: "bg-focco-blue-pale text-focco-blue-dark",
+  laranja: "bg-focco-orange-pale text-focco-orange-dark",
+  rosa: "bg-focco-pink-pale text-focco-pink-dark",
+  vermelho: "bg-focco-red-pale text-focco-red-dark",
+} as const;
+
+/** Card de estatística temático (fundo pálido + número grande na cor escura) — dashboard. */
+export function StatCard({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string | number;
+  accent: keyof typeof STAT_CARD_ACCENTS;
+}) {
+  return (
+    <div className={cn("rounded-xl p-4", STAT_CARD_ACCENTS[accent])}>
+      <p className="m-0 text-[26px] font-extrabold leading-tight">{value}</p>
+      <p className="mt-1 text-[11.5px] opacity-85">{label}</p>
+    </div>
   );
 }
 

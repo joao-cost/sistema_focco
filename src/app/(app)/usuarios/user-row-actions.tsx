@@ -13,7 +13,7 @@ export function UserRowActions({ userId, ativo }: { userId: string; ativo: boole
       </form>
       <form action={resetUserPasswordAction.bind(null, userId)}>
         <Button type="submit" variant="ghost" size="sm">
-          Redefinir senha
+          Enviar link de redefinição
         </Button>
       </form>
     </div>

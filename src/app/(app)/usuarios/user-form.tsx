@@ -31,7 +31,7 @@ export function UserForm() {
         <Input id="telefone" name="telefone" />
       </Field>
       <Field label="Senha inicial (opcional)" htmlFor="password" error={state?.fieldErrors?.password?.[0]}>
-        <Input id="password" name="password" type="password" placeholder="Padrão: focco123" />
+        <Input id="password" name="password" type="password" placeholder="Em branco: envia convite por e-mail" />
       </Field>
       <div className="sm:col-span-2">
         <Button type="submit" disabled={pending}>

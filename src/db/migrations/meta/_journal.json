@@ -15,6 +15,13 @@
       "when": 1787360339627,
       "tag": "0001_common_dormammu",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789448839258,
+      "tag": "0002_spooky_triathlon",
+      "breakpoints": true
     }
   ]
 }

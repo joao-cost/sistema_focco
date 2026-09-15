@@ -3,38 +3,35 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { getModuleAccent, type ModuleKey } from "@/lib/theme";
 import type { UserRole } from "@/auth";
 
-const ALL_LINKS = [
-  { href: "/celulas", label: "Células", roles: ["coordenacao", "facilitador", "articulador"] },
-  { href: "/avisos", label: "Avisos", roles: ["coordenacao", "facilitador", "articulador"] },
-  { href: "/coordenacao", label: "Dashboard", roles: ["coordenacao"] },
-  { href: "/usuarios", label: "Usuários", roles: ["coordenacao"] },
-] as const;
+const ALL_LINKS: { href: string; label: string; module: ModuleKey; roles: UserRole[] }[] = [
+  { href: "/coordenacao", label: "Dashboard", module: "dashboard", roles: ["coordenacao"] },
+  { href: "/celulas", label: "Células", module: "celulas", roles: ["coordenacao", "facilitador", "articulador"] },
+  { href: "/avisos", label: "Avisos", module: "avisos", roles: ["coordenacao", "facilitador", "articulador"] },
+  { href: "/usuarios", label: "Usuários", module: "usuarios", roles: ["coordenacao"] },
+];
 
 export function Nav({ role }: { role: UserRole }) {
   const pathname = usePathname();
-  const links = ALL_LINKS.filter((l) => (l.roles as readonly string[]).includes(role));
+  const links = ALL_LINKS.filter((l) => l.roles.includes(role));
 
   return (
-    <nav className="flex items-center gap-1">
+    <nav className="flex flex-col gap-0.5">
       {links.map((link) => {
         const active = pathname === link.href || pathname.startsWith(link.href + "/");
+        const accent = getModuleAccent(link.module);
         return (
           <Link
             key={link.href}
             href={link.href}
             className={cn(
-              "relative rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-              active
-                ? "bg-focco-green-pale text-focco-green-dark"
-                : "text-muted hover:bg-gray-100 hover:text-foreground"
+              "rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+              active ? cn(accent.bg, accent.text, "font-semibold") : "text-muted hover:bg-gray-100 hover:text-foreground"
             )}
           >
             {link.label}
-            {active && (
-              <span className="focco-accent-bar absolute inset-x-2 -bottom-[1px] h-0.5 rounded-full" />
-            )}
           </Link>
         );
       })}

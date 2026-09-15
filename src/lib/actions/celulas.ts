@@ -6,7 +6,8 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { celulandos, celulas, encontros, presencas, avisos } from "@/db/schema";
 import { verifySession, requireRole } from "@/lib/dal";
-import { canManageAllCelulas } from "@/lib/queries/celulas";
+import { canManageAllCelulas, getCelulaRecipients } from "@/lib/queries/celulas";
+import { sendAvisoNotificationEmail } from "@/lib/email";
 import {
   avisoSchema,
   celulaSchema,
@@ -275,6 +276,28 @@ export async function createAvisoAction(
 
   revalidatePath("/celulas");
   if (celulaId) revalidatePath(`/celulas/${celulaId}`);
+
+  // Notifica por e-mail quem acompanha a célula (best-effort — uma falha de
+  // envio não deve impedir o aviso de ter sido registrado).
+  if (celulaId) {
+    try {
+      const { celulaNome, recipients } = await getCelulaRecipients(celulaId);
+      await Promise.all(
+        recipients
+          .filter((r) => r.email !== session.user.email)
+          .map((r) =>
+            sendAvisoNotificationEmail(r.email, r.name, {
+              celulaNome,
+              data,
+              horario: horario || null,
+              mensagem,
+            })
+          )
+      );
+    } catch (err) {
+      console.error("[createAvisoAction] falha ao enviar notificações:", err);
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------

@@ -15,6 +15,10 @@ de acesso para coordenação, facilitadores e articuladores.
   duração, processamento de grupo) com lista de presença dos celulandos.
 - **Avisos temporários**: substitui a antiga aba "Observações Temporárias" da
   planilha — trocas de sala, cancelamentos e exceções pontuais, com validade.
+  Articulador e facilitadores da célula são notificados por e-mail.
+- **Login por e-mail self-service**: "esqueci minha senha", convite de novo
+  usuário e reset administrativo funcionam por link enviado por e-mail (ver
+  seção "E-mail (Resend)").
 - **Dashboard da coordenação**: indicadores gerais do programa (células ativas,
   celulandos ativos, encontros recentes, taxa de presença, avisos ativos).
 - **Usuários e papéis**: coordenação, facilitador e articulador, cada um com
@@ -109,6 +113,41 @@ Usuários de exemplo criados pelo seed (senha padrão `focco123`):
 Se preferir rodar localmente sem Docker: Postgres 16 acessível via
 `DATABASE_URL`, depois `npm install`, `npm run db:migrate`, `npm run db:seed` e
 `npm run dev`.
+
+## E-mail (SMTP Gmail)
+
+Três fluxos dependem de e-mail: "esqueci minha senha" (self-service),
+convite de usuário novo (a coordenação cria sem senha → o usuário recebe um
+link pra definir a dele) e notificação de avisos temporários (articulador +
+facilitadores da célula afetada).
+
+**Por que não o e-mail institucional da UNEMAT?** A TI da UNEMAT bloqueia
+autenticação SMTP por credencial de app externo na conta institucional — é
+política deles, não dá pra contornar. A alternativa usada aqui é uma conta
+Gmail (pessoal ou dedicada ao projeto) com **Verificação em duas etapas**
+ativada e uma **Senha de app** gerada especificamente pra isso (não é a
+senha normal da conta).
+
+1. Na conta Gmail que vai enviar os e-mails: ative a Verificação em duas
+   etapas em [myaccount.google.com/security](https://myaccount.google.com/security)
+   (obrigatório — sem isso não existe a opção de Senha de app).
+2. Gere uma Senha de app em
+   [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
+   (nome sugerido: "Sistema FOCCO") — copie o código de 16 caracteres.
+3. Defina nas variáveis de ambiente (Portainer/`.env.prod`):
+   - `SMTP_HOST=smtp.gmail.com`
+   - `SMTP_PORT=587`
+   - `SMTP_USER` — o endereço Gmail completo.
+   - `SMTP_PASS` — a Senha de app gerada no passo 2 (sem espaços).
+   - `EMAIL_FROM` — ex: `FOCCO <seuprojeto@gmail.com>` (mesmo endereço do
+     `SMTP_USER`, ou um alias dele).
+
+**Limite:** contas Gmail comuns enviam até ~500 e-mails/dia — de sobra pro
+volume do FOCCO (avisos + convites + resets), mas vale saber que existe.
+
+Sem `SMTP_HOST`/`SMTP_USER`/`SMTP_PASS` definidos, o sistema não quebra — os
+e-mails só são logados no console (`src/lib/email.ts`) em vez de enviados de
+verdade, o que é conveniente em desenvolvimento.
 
 ## Deploy em produção (VPS / Docker Swarm)
 
@@ -258,6 +297,7 @@ seções do artigo):
   contas da coordenação.
 - Avaliação estruturada dos 5 pilares da aprendizagem cooperativa por
   encontro, não só um campo de texto livre.
-- Notificações (e-mail/WhatsApp) para articuladores sobre avisos temporários.
+- Notificações por WhatsApp para articuladores sobre avisos temporários (o
+  e-mail já está implementado — ver seção "E-mail (Resend)").
 - Histórico/auditoria de alterações nas células.
 - App/PWA para registro de presença offline durante o encontro.
