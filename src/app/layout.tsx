@@ -28,8 +28,17 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className="h-full antialiased">
+    <html lang="pt-BR" className="h-full antialiased" suppressHydrationWarning>
       <body className="min-h-full flex flex-col bg-background">
+        {/* Aplica o tema salvo (se houver) antes da primeira pintura — evita
+            o "flash" do tema errado entre o HTML do servidor (sempre claro
+            por padrão) e o JS do seletor de tema carregar. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var t=localStorage.getItem('focco-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}catch(e){}",
+          }}
+        />
         {children}
         <RegisterServiceWorker />
       </body>

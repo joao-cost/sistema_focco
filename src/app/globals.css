@@ -44,8 +44,15 @@
   --focco-navy-deep: #0a1526;
 }
 
+/*
+ * Tema escuro: aplica automaticamente pela preferência do SO/navegador — a
+ * menos que o usuário tenha escolhido um tema manualmente no seletor da
+ * sidebar, guardado em localStorage e refletido em [data-theme] no <html>
+ * (ver theme-toggle.tsx e o script inline em layout.tsx que evita o "flash"
+ * do tema errado antes do JS carregar).
+ */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     color-scheme: dark;
     --background: #0b1220;
     --foreground: #e8edf5;
@@ -63,6 +70,25 @@
     --focco-pink-pale: #35182a;
     --focco-red-pale: #35181c;
   }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #0b1220;
+  --foreground: #e8edf5;
+  --surface: #121a2c;
+  --border: #263149;
+  --muted: #8a97b0;
+  --text-secondary: #c3cbdb;
+  --text-tertiary: #7c8aa3;
+  --border-subtle: #1c2438;
+  --surface-subtle: #16203350;
+
+  --focco-green-pale: #17301c;
+  --focco-blue-pale: #142a3d;
+  --focco-orange-pale: #332208;
+  --focco-pink-pale: #35182a;
+  --focco-red-pale: #35181c;
 }
 
 @theme inline {

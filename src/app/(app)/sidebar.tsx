@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Nav } from "./nav";
 import { logoutAction } from "./logout-action";
 import { Avatar, Button } from "@/components/ui";
+import { ThemeToggle } from "./theme-toggle";
 import type { UserRole } from "@/auth";
 
 const SIDEBAR_WIDTH = 216;
@@ -69,10 +70,11 @@ export function Sidebar({
 
         <div className="mt-auto flex items-center gap-2.5 border-t border-border pt-4">
           <Avatar name={userName} />
-          <div className="min-w-0 overflow-hidden">
+          <div className="min-w-0 flex-1 overflow-hidden">
             <p className="truncate text-xs font-semibold text-foreground">{userName}</p>
             <p className="text-[10.5px] text-muted">{roleLabel}</p>
           </div>
+          <ThemeToggle />
         </div>
         <form action={logoutAction} className="mt-3">
           <Button type="submit" variant="ghost" size="sm" className="w-full justify-start px-0.5 text-muted">
