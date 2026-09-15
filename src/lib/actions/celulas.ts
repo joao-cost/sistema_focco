@@ -64,11 +64,24 @@ export async function createCelulaAction(
     horario: formData.get("horario") ?? "",
     local: formData.get("local") ?? "",
     observacoes: formData.get("observacoes") ?? "",
+    descricaoPublica: formData.get("descricaoPublica") ?? "",
+    whatsappLink: formData.get("whatsappLink") ?? "",
   });
   if ("error" in parsed) return parsed.error;
 
-  const { nome, tema, curso, articuladorId, diaSemana, turno, horario, local, observacoes } =
-    parsed.data as z_CelulaInput;
+  const {
+    nome,
+    tema,
+    curso,
+    articuladorId,
+    diaSemana,
+    turno,
+    horario,
+    local,
+    observacoes,
+    descricaoPublica,
+    whatsappLink,
+  } = parsed.data as z_CelulaInput;
 
   const [created] = await db
     .insert(celulas)
@@ -82,6 +95,8 @@ export async function createCelulaAction(
       horario: horario || null,
       local: local || null,
       observacoes: observacoes || null,
+      descricaoPublica: descricaoPublica || null,
+      whatsappLink: whatsappLink || null,
     })
     .returning({ id: celulas.id });
 
@@ -106,11 +121,24 @@ export async function updateCelulaAction(
     horario: formData.get("horario") ?? "",
     local: formData.get("local") ?? "",
     observacoes: formData.get("observacoes") ?? "",
+    descricaoPublica: formData.get("descricaoPublica") ?? "",
+    whatsappLink: formData.get("whatsappLink") ?? "",
   });
   if ("error" in parsed) return parsed.error;
 
-  const { nome, tema, curso, articuladorId, diaSemana, turno, horario, local, observacoes } =
-    parsed.data as z_CelulaInput;
+  const {
+    nome,
+    tema,
+    curso,
+    articuladorId,
+    diaSemana,
+    turno,
+    horario,
+    local,
+    observacoes,
+    descricaoPublica,
+    whatsappLink,
+  } = parsed.data as z_CelulaInput;
 
   await db
     .update(celulas)
@@ -124,6 +152,8 @@ export async function updateCelulaAction(
       horario: horario || null,
       local: local || null,
       observacoes: observacoes || null,
+      descricaoPublica: descricaoPublica || null,
+      whatsappLink: whatsappLink || null,
       updatedAt: new Date(),
     })
     .where(eq(celulas.id, celulaId));
@@ -314,6 +344,8 @@ type z_CelulaInput = {
   horario?: string;
   local?: string;
   observacoes?: string;
+  descricaoPublica?: string;
+  whatsappLink?: string;
 };
 
 type z_CelulandoInput = {

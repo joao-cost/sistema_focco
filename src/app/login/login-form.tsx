@@ -54,8 +54,14 @@ export function LoginForm({
       >
         {pending ? "Entrando..." : "Entrar"}
       </button>
-      {/* "Ver a vitrine pública" (link do protótipo) fica pra quando a rota
-          /vitrine existir de verdade — Fase 4 do handoff de design. */}
+      <div className="pt-1 text-center">
+        <Link
+          href="/vitrine"
+          className={cn("text-xs", isMobile ? "text-white/55 hover:text-white/80" : "text-[#98A2B3] hover:text-muted")}
+        >
+          Ver a vitrine pública das células →
+        </Link>
+      </div>
     </form>
   );
 }

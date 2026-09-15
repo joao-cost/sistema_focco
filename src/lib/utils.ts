@@ -48,6 +48,28 @@ export const TURNO_LABELS: Record<string, string> = {
   noite: "Noite",
 };
 
+export const BOLSA_CATEGORIA_LABELS: Record<string, string> = {
+  integral: "Cota Integral",
+  parcial: "Cota Parcial",
+};
+
+export const BOLSA_STATUS_LABELS: Record<string, string> = {
+  ativo: "Ativo",
+  suspenso: "Suspenso",
+  encerrado: "Encerrado",
+};
+
+export const DOCUMENTACAO_STATUS_LABELS: Record<string, string> = {
+  completa: "Completa",
+  pendente: "Pendente",
+};
+
+export const RELATORIO_STATUS_LABELS: Record<string, string> = {
+  entregue: "Entregue",
+  atrasado: "Atrasado",
+  em_dia: "Em dia",
+};
+
 export function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
 }

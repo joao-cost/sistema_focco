@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/esqueci-senha", "/redefinir-senha"];
+const PUBLIC_PATHS = ["/login", "/esqueci-senha", "/redefinir-senha", "/vitrine"];
 
 export default auth((req) => {
   const { nextUrl } = req;

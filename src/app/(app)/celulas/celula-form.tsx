@@ -25,6 +25,8 @@ export function CelulaForm({
     horario?: string | null;
     local?: string | null;
     observacoes?: string | null;
+    descricaoPublica?: string | null;
+    whatsappLink?: string | null;
   };
   submitLabel?: string;
 }) {
@@ -92,6 +94,32 @@ export function CelulaForm({
       <Field label="Observações" htmlFor="observacoes">
         <Textarea id="observacoes" name="observacoes" rows={3} defaultValue={defaultValues?.observacoes ?? ""} />
       </Field>
+
+      <div className="rounded-xl border border-focco-green-pale bg-focco-green-pale/30 p-4">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-focco-green-dark">
+          Vitrine pública (opcional)
+        </p>
+        <div className="space-y-4">
+          <Field label="Descrição pública" htmlFor="descricaoPublica">
+            <Textarea
+              id="descricaoPublica"
+              name="descricaoPublica"
+              rows={2}
+              defaultValue={defaultValues?.descricaoPublica ?? ""}
+              placeholder="Texto curto mostrado na vitrine pública das células."
+            />
+          </Field>
+          <Field label="Link do grupo (WhatsApp)" htmlFor="whatsappLink">
+            <Input
+              id="whatsappLink"
+              name="whatsappLink"
+              type="url"
+              defaultValue={defaultValues?.whatsappLink ?? ""}
+              placeholder="https://chat.whatsapp.com/..."
+            />
+          </Field>
+        </div>
+      </div>
 
       <Button type="submit" disabled={pending}>
         {pending ? "Salvando..." : submitLabel}

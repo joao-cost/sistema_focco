@@ -164,6 +164,13 @@ const BADGE_STYLES: Record<string, string> = {
   coordenacao: "bg-focco-blue-pale text-focco-blue-dark",
   facilitador: "bg-focco-orange-pale text-focco-orange-dark",
   articulador: "bg-focco-green-pale text-focco-green-dark",
+  suspenso: "bg-focco-orange-pale text-focco-orange-dark",
+  encerrado: "bg-gray-100 text-gray-700",
+  completa: "bg-focco-green-pale text-focco-green-dark",
+  pendente: "bg-focco-pink-pale text-focco-pink-dark",
+  entregue: "bg-focco-green-pale text-focco-green-dark",
+  atrasado: "bg-focco-pink-pale text-focco-pink-dark",
+  em_dia: "bg-focco-green-pale text-focco-green-dark",
 };
 
 export function Badge({ value, label }: { value: string; label: string }) {

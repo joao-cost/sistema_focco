@@ -118,6 +118,10 @@ export const celulas = pgTable("celulas", {
   horario: varchar("horario", { length: 60 }), // ex: "13h30 às 17h30"
   local: varchar("local", { length: 255 }), // ex: "Sala C3"
   observacoes: text("observacoes"),
+  // Campos usados na vitrine pública (focco.hyperdynamis.com) — opcionais,
+  // preenchidos pela coordenação quando quiser divulgar a célula.
+  descricaoPublica: text("descricao_publica"),
+  whatsappLink: varchar("whatsapp_link", { length: 500 }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -202,6 +206,100 @@ export const presencas = pgTable(
   },
   (t) => [primaryKey({ columns: [t.encontroId, t.celulandoId] })]
 );
+
+// ---------------------------------------------------------------------------
+// Bolsistas (articuladores que recebem bolsa) + histórico de relatórios
+// ---------------------------------------------------------------------------
+
+export const bolsaCategoriaEnum = pgEnum("bolsa_categoria", ["integral", "parcial"]);
+export const bolsaStatusEnum = pgEnum("bolsa_status", ["ativo", "suspenso", "encerrado"]);
+export const documentacaoStatusEnum = pgEnum("documentacao_status", ["completa", "pendente"]);
+export const relatorioStatusEnum = pgEnum("relatorio_status", ["entregue", "atrasado"]);
+
+/**
+ * Uma bolsa por articulador-bolsista. Não guarda dados bancários — só o
+ * status da documentação. A célula do bolsista é derivada via
+ * celulas.articuladorId (o bolsista já é articulador de alguma célula),
+ * não duplicada aqui.
+ */
+export const bolsas = pgTable("bolsas", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  articuladorId: uuid("articulador_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  categoria: bolsaCategoriaEnum("categoria").notNull(),
+  vigenciaInicio: date("vigencia_inicio").notNull(),
+  vigenciaFim: date("vigencia_fim").notNull(),
+  status: bolsaStatusEnum("status").notNull().default("ativo"),
+  documentacaoStatus: documentacaoStatusEnum("documentacao_status").notNull().default("pendente"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+/** Histórico de relatórios entregues (ou não) por um bolsista. */
+export const bolsaRelatorios = pgTable("bolsa_relatorios", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  bolsaId: uuid("bolsa_id")
+    .notNull()
+    .references(() => bolsas.id, { onDelete: "cascade" }),
+  data: date("data").notNull(),
+  status: relatorioStatusEnum("status").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const bolsasRelations = relations(bolsas, ({ one, many }) => ({
+  articulador: one(users, { fields: [bolsas.articuladorId], references: [users.id] }),
+  relatorios: many(bolsaRelatorios),
+}));
+
+export const bolsaRelatoriosRelations = relations(bolsaRelatorios, ({ one }) => ({
+  bolsa: one(bolsas, { fields: [bolsaRelatorios.bolsaId], references: [bolsas.id] }),
+}));
+
+// ---------------------------------------------------------------------------
+// Chamada de presença de bolsistas (reuniões administrativas — separado dos
+// "encontros" das células)
+// ---------------------------------------------------------------------------
+
+export const chamadas = pgTable("chamadas", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  data: date("data").notNull().unique(),
+  registradoPorId: uuid("registrado_por_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "restrict" }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const chamadaPresencas = pgTable(
+  "chamada_presencas",
+  {
+    chamadaId: uuid("chamada_id")
+      .notNull()
+      .references(() => chamadas.id, { onDelete: "cascade" }),
+    bolsaId: uuid("bolsa_id")
+      .notNull()
+      .references(() => bolsas.id, { onDelete: "cascade" }),
+    presente: boolean("presente").notNull().default(false),
+  },
+  (t) => [primaryKey({ columns: [t.chamadaId, t.bolsaId] })]
+);
+
+export const chamadasRelations = relations(chamadas, ({ many }) => ({
+  presencas: many(chamadaPresencas),
+}));
+
+export const chamadaPresencasRelations = relations(chamadaPresencas, ({ one }) => ({
+  chamada: one(chamadas, { fields: [chamadaPresencas.chamadaId], references: [chamadas.id] }),
+  bolsa: one(bolsas, { fields: [chamadaPresencas.bolsaId], references: [bolsas.id] }),
+}));
 
 // ---------------------------------------------------------------------------
 // Avisos temporários (substitui a aba "Observações Temporárias" da planilha)

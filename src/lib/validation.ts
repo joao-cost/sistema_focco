@@ -13,6 +13,8 @@ export const celulaSchema = z.object({
   horario: z.string().trim().optional().or(z.literal("")),
   local: z.string().trim().optional().or(z.literal("")),
   observacoes: z.string().trim().optional().or(z.literal("")),
+  descricaoPublica: z.string().trim().optional().or(z.literal("")),
+  whatsappLink: z.url("Link inválido.").optional().or(z.literal("")),
 });
 
 export const celulandoSchema = z.object({
@@ -46,6 +48,22 @@ export const userSchema = z.object({
   curso: z.string().trim().optional().or(z.literal("")),
   telefone: z.string().trim().optional().or(z.literal("")),
   password: z.string().min(6, "A senha deve ter ao menos 6 caracteres.").optional().or(z.literal("")),
+});
+
+export const bolsaSchema = z.object({
+  articuladorId: z.uuid("Selecione um articulador."),
+  categoria: z.enum(["integral", "parcial"]),
+  vigenciaInicio: z.iso.date("Informe a data de início."),
+  vigenciaFim: z.iso.date("Informe a data de fim."),
+});
+
+export const relatorioSchema = z.object({
+  data: z.iso.date("Informe a data do relatório."),
+  status: z.enum(["entregue", "atrasado"]),
+});
+
+export const chamadaSchema = z.object({
+  data: z.iso.date("Informe a data da reunião."),
 });
 
 export const requestPasswordResetSchema = z.object({
