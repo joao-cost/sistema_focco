@@ -28,5 +28,10 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // Além dos internos do Next.js, exclui qualquer arquivo estático servido
+  // de public/ (extensão de arquivo na URL) — sem isso, o otimizador de
+  // imagens do Next.js (/_next/image) recebe o HTML de redirecionamento
+  // pro /login em vez do arquivo real ao tentar buscar internamente uma
+  // imagem pública (ex: logo da tela de login) sem sessão autenticada.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.[\\w]+$).*)"],
 };
