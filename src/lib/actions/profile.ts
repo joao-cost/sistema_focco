@@ -9,6 +9,7 @@ import { users } from "@/db/schema";
 import { verifySession } from "@/lib/dal";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { changePasswordSchema, profileSchema } from "@/lib/validation";
+import { deleteFromR2ByUrl, isR2Configured, uploadToR2 } from "@/lib/storage";
 
 export type ProfileActionState =
   | { error?: string; fieldErrors?: Record<string, string[]>; success?: string }
@@ -60,15 +61,23 @@ export async function updateProfileAction(
 
     const ext = ALLOWED_TYPES[avatarFile.type];
     const filename = `${session.user.id}-${Date.now()}.${ext}`;
-    await mkdir(UPLOAD_DIR, { recursive: true });
     const bytes = Buffer.from(await avatarFile.arrayBuffer());
-    await writeFile(path.join(UPLOAD_DIR, filename), bytes);
-    updates.avatarUrl = `/uploads/avatars/${filename}`;
 
-    if (current?.avatarUrl?.startsWith("/uploads/avatars/")) {
-      await unlink(path.join(process.cwd(), "public", current.avatarUrl)).catch(() => {
-        // Falha ao apagar a foto antiga não é crítica — só fica um arquivo órfão.
-      });
+    if (isR2Configured) {
+      updates.avatarUrl = await uploadToR2(`avatars/${filename}`, bytes, avatarFile.type);
+      if (current?.avatarUrl) await deleteFromR2ByUrl(current.avatarUrl);
+    } else {
+      // Fallback local em disco — útil em dev sem precisar configurar o R2
+      // (ver README > variáveis R2_*). Em produção, o volume Docker
+      // "focco_uploads" cobre esse caminho se o R2 não estiver configurado.
+      await mkdir(UPLOAD_DIR, { recursive: true });
+      await writeFile(path.join(UPLOAD_DIR, filename), bytes);
+      updates.avatarUrl = `/uploads/avatars/${filename}`;
+      if (current?.avatarUrl?.startsWith("/uploads/avatars/")) {
+        await unlink(path.join(process.cwd(), "public", current.avatarUrl)).catch(() => {
+          // Falha ao apagar a foto antiga não é crítica — só fica um arquivo órfão.
+        });
+      }
     }
   }
 

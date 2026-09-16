@@ -149,6 +149,33 @@ Sem `SMTP_HOST`/`SMTP_USER`/`SMTP_PASS` definidos, o sistema não quebra — os
 e-mails só são logados no console (`src/lib/email.ts`) em vez de enviados de
 verdade, o que é conveniente em desenvolvimento.
 
+## Armazenamento de arquivos (R2)
+
+Hoje usado só pra foto de perfil (`/perfil`). Usa **Cloudflare R2**
+(armazenamento de objetos compatível com S3) em vez de salvar no disco do
+container — assim o arquivo não fica preso a um nó específico do Docker
+Swarm nem some se o container for recriado num nó diferente.
+
+1. No painel da Cloudflare, crie um bucket R2 (ex: `sistema-focco`).
+2. Em **Configurações** do bucket → **URL de desenvolvimento público** →
+   **Habilitar** (gera um domínio tipo `https://pub-xxxxxxxx.r2.dev` — é o
+   que serve as fotos por link direto). Pra produção "de verdade" dá pra
+   trocar depois por um domínio próprio (**Custom Domains**), mas o `.r2.dev`
+   já funciona.
+3. Em **Gerenciar tokens de API** → crie um token de API com permissão de
+   leitura/escrita nesse bucket — ele te dá `Access Key ID` e
+   `Secret Access Key` (credenciais no padrão S3, diferentes do token da
+   API nativa da Cloudflare).
+4. Defina nas variáveis de ambiente (Portainer/`.env.prod`):
+   - `R2_ACCOUNT_ID` — ID da conta Cloudflare (aparece no painel do R2).
+   - `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` — do token criado no passo 3.
+   - `R2_BUCKET` — nome do bucket (ex: `sistema-focco`).
+   - `R2_PUBLIC_URL` — a URL do passo 2, sem barra no final.
+
+Sem essas variáveis, o upload de foto cai num fallback local em disco
+(volume Docker `focco_uploads`, ver `docker-stack.yml`) — funciona, só que
+com a limitação de node do Swarm mencionada acima.
+
 ## Deploy em produção (VPS / Docker Swarm)
 
 Duas opções, no mesmo repositório: `docker-compose.prod.yml` (mais simples,
