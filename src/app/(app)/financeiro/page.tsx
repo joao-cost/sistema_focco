@@ -2,6 +2,7 @@ import { requireRole } from "@/lib/dal";
 import {
   getSaldoCaixa,
   getVaquinhaDoMes,
+  incrementCompetencia,
   listActiveUsers,
   listCompras,
   listMovimentacoes,
@@ -23,6 +24,8 @@ export default async function FinanceiroPage({
 
   const competencias = await listVaquinhaCompetencias();
   const competenciaAtual = mes || competencias[0] || nextCompetencia();
+  const proximaCompetenciaSugerida =
+    competencias.length > 0 ? incrementCompetencia(competencias[0]) : nextCompetencia();
 
   const [saldo, pagamentos, usuarios, compras, movimentacoes] = await Promise.all([
     getSaldoCaixa(),
@@ -51,7 +54,7 @@ export default async function FinanceiroPage({
           competencia={competenciaAtual}
           competencias={competencias.length > 0 ? competencias : [competenciaAtual]}
           pagamentos={pagamentos}
-          proximaCompetenciaSugerida={nextCompetencia()}
+          proximaCompetenciaSugerida={proximaCompetenciaSugerida}
         />
         <ComprasSection compras={compras} usuarios={usuarios} />
         <MovimentacaoSection movimentacoes={movimentacoes} />

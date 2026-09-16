@@ -75,3 +75,10 @@ export function nextCompetencia() {
   const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
   return `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}`;
 }
+
+/** Mês seguinte a uma competência "AAAA-MM" já lançada. */
+export function incrementCompetencia(competencia: string) {
+  const [ano, mes] = competencia.split("-").map(Number);
+  const next = new Date(ano, mes, 1);
+  return `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}`;
+}

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { compraParticipantes, compras, movimentacoes, users, vaquinhaPagamentos } from "@/db/schema";
 import { requireRole } from "@/lib/dal";
@@ -42,6 +42,30 @@ export async function lancarVaquinhaMesAction(
       }))
     );
   }
+
+  revalidatePath("/financeiro");
+}
+
+export async function editarValorVaquinhaAction(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  await requireRole("coordenacao", "facilitador");
+
+  const result = vaquinhaMesSchema.safeParse({
+    competencia: formData.get("competencia"),
+    valorEsperado: formData.get("valorEsperado"),
+  });
+  if (!result.success) {
+    return { error: "Verifique os campos destacados.", fieldErrors: result.error.flatten().fieldErrors };
+  }
+  const { competencia, valorEsperado } = result.data;
+
+  // Só atualiza quem ainda não pagou — pagamentos já feitos mantêm o valor original.
+  await db
+    .update(vaquinhaPagamentos)
+    .set({ valorEsperado: valorEsperado.toFixed(2) })
+    .where(and(eq(vaquinhaPagamentos.competencia, competencia), eq(vaquinhaPagamentos.pago, false)));
 
   revalidatePath("/financeiro");
 }
