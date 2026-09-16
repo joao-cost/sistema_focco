@@ -42,27 +42,51 @@ function InstagramIcon() {
   );
 }
 
-/** Formas decorativas grandes e angulares — visual "cheio", não minimalista, igual a vitrine anterior. */
-function DecorShapes() {
+/**
+ * Fundo decorativo — fitas fluidas coloridas na diagonal, inspirado na
+ * textura oficial do FOCCO (camiseta/identidade visual), não nos blocos
+ * geométricos do protótipo original. Mais "cheio" e vibrante de propósito.
+ */
+function DecorRibbons() {
+  const RIBBONS = [
+    { d: "M -100 780 C 150 620, 250 500, 420 430 S 680 260, 950 40", color: "var(--focco-green)", w: 26, o: 0.55 },
+    { d: "M -60 850 C 200 700, 320 560, 480 480 S 760 300, 1050 90", color: "var(--focco-orange)", w: 22, o: 0.55 },
+    { d: "M -40 900 C 260 760, 380 610, 540 520 S 830 330, 1150 130", color: "var(--focco-blue)", w: 20, o: 0.5 },
+    { d: "M 0 950 C 300 820, 430 650, 600 560 S 900 360, 1220 170", color: "var(--focco-red)", w: 16, o: 0.45 },
+    { d: "M 950 -80 C 780 120, 700 240, 640 360 S 500 600, 260 760", color: "var(--focco-pink)", w: 24, o: 0.4 },
+    { d: "M 1250 -60 C 1080 140, 980 280, 900 400 S 720 660, 460 820", color: "var(--focco-green)", w: 14, o: 0.35 },
+    { d: "M 1350 100 C 1150 280, 1050 420, 960 540 S 760 780, 520 920", color: "var(--focco-orange)", w: 10, o: 0.35 },
+  ];
+  const HAIRLINES = [
+    "M -100 200 C 300 100, 700 300, 1300 150",
+    "M -100 450 C 400 350, 800 550, 1300 400",
+    "M -100 650 C 350 750, 750 550, 1300 680",
+    "M 200 -50 C 350 250, 250 550, 450 950",
+    "M 900 -50 C 800 250, 950 550, 800 950",
+  ];
+
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div
-        className="absolute -top-16 -left-20 h-[340px] w-[340px] bg-focco-green opacity-25"
-        style={{ clipPath: "polygon(0 0, 100% 0, 0 100%)" }}
-      />
-      <div
-        className="absolute -top-24 right-[-140px] h-[420px] w-[420px] rotate-12 bg-gradient-to-br from-focco-orange to-focco-pink opacity-25"
-        style={{ clipPath: "polygon(20% 0, 100% 15%, 85% 100%, 0 70%)" }}
-      />
-      <div
-        className="absolute top-1/3 -right-24 h-[300px] w-[300px] -rotate-6 bg-focco-blue opacity-15"
-        style={{ clipPath: "polygon(0 20%, 100% 0, 100% 100%, 10% 80%)" }}
-      />
-      <div
-        className="absolute bottom-[-120px] left-[-80px] h-[320px] w-[320px] bg-gradient-to-tr from-focco-pink to-focco-orange opacity-20"
-        style={{ clipPath: "polygon(0 100%, 100% 100%, 40% 0)" }}
-      />
-    </div>
+    <svg
+      aria-hidden
+      className="pointer-events-none absolute inset-0 h-full w-full"
+      viewBox="0 0 1200 900"
+      preserveAspectRatio="xMidYMid slice"
+    >
+      {HAIRLINES.map((d, i) => (
+        <path key={i} d={d} fill="none" stroke="white" strokeWidth={1} opacity={0.07} />
+      ))}
+      {RIBBONS.map((r, i) => (
+        <path
+          key={i}
+          d={r.d}
+          fill="none"
+          stroke={r.color}
+          strokeWidth={r.w}
+          strokeLinecap="round"
+          opacity={r.o}
+        />
+      ))}
+    </svg>
   );
 }
 
@@ -71,7 +95,7 @@ export default async function VitrinePage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-focco-navy">
-      <DecorShapes />
+      <DecorRibbons />
 
       <div className="relative mx-auto max-w-5xl px-5 pb-16 pt-10 sm:px-8 sm:pt-14">
         {/* Painel principal — logo/tagline + Instagram, tudo num card só (igual a vitrine anterior) */}
