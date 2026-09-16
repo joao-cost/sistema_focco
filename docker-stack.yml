@@ -1,39 +1,12 @@
-# Stack para o Swarm da HDSwarmPrincipal — usa o Traefik JÁ EXISTENTE nessa
-# VPS (rede externa HDSwarmNet, certresolver "letsencryptresolver"), então
-# este stack NÃO sobe um Traefik próprio — só se conecta ao que já roda.
-#
-# A imagem é publicada automaticamente no Docker Hub a cada push na main
-# (ver .github/workflows/docker-publish.yml) — a VPS só puxa a tag, não
-# builda nada localmente.
-#
-# Pré-requisitos:
-#   - Rede externa HDSwarmNet já criada (já está, é usada pelo Portainer/Traefik).
-#   - Domínio DOMAIN com um registro A apontando para o IP da VPS.
-#   - Secrets DOCKERHUB_USERNAME e DOCKERHUB_TOKEN configurados no GitHub
-#     (Settings > Secrets and variables > Actions do repositório).
-#
-# Configuração (arquivo .env.prod na mesma pasta — ver .env.prod.example):
-#   DB_PASSWORD, AUTH_SECRET, DOMAIN, DOCKERHUB_IMAGE
-#
-# PUBLIC_DOMAIN (opcional): domínio separado, 100% público, que serve só a
-# vitrine de células (/vitrine) — nenhuma outra rota (nem /login) fica
-# acessível por ele, mesmo digitando a URL direto (ver src/proxy.ts). Se não
-# definir, esse segundo router do Traefik fica com uma regra que nunca bate
-# com tráfego real, sem quebrar nada.
-#
-# Deploy (primeira vez — puxa a imagem do Docker Hub automaticamente):
-#   export $(grep -v '^#' .env.prod | xargs) && \
-#   docker stack deploy -c docker-stack.yml focco
-#
-# Atualizar depois de um novo push (nova imagem já publicada pelo GitHub Actions):
-#   docker service update --image $DOCKERHUB_IMAGE --force focco_app
+# stack: focco
 
 services:
+  # banco de dados
   db:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: focco
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env.prod}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD}
       POSTGRES_DB: sistema_focco
     volumes:
       - focco_db_data:/var/lib/postgresql/data
@@ -43,13 +16,14 @@ services:
       placement:
         constraints: [node.role == manager]
 
+  # aplicação
   app:
-    image: ${DOCKERHUB_IMAGE:?defina DOCKERHUB_IMAGE no .env.prod}
+    image: ${DOCKERHUB_IMAGE:?defina DOCKERHUB_IMAGE}
     environment:
-      DATABASE_URL: postgresql://focco:${DB_PASSWORD:?defina DB_PASSWORD no .env.prod}@db:5432/sistema_focco
-      AUTH_SECRET: ${AUTH_SECRET:?defina AUTH_SECRET no .env.prod}
+      DATABASE_URL: postgresql://focco:${DB_PASSWORD:?defina DB_PASSWORD}@db:5432/sistema_focco
+      AUTH_SECRET: ${AUTH_SECRET:?defina AUTH_SECRET}
       AUTH_TRUST_HOST: "true"
-      AUTH_URL: https://${DOMAIN:?defina DOMAIN no .env.prod}
+      AUTH_URL: https://${DOMAIN:?defina DOMAIN}
       NEXT_TELEMETRY_DISABLED: "1"
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-}
@@ -65,15 +39,7 @@ services:
     networks:
       - HDSwarmNet
       - focco_internal
-    volumes:
-      # Fotos de perfil dos usuários (ver /perfil) — precisa ser volume
-      # nomeado (não perde no redeploy) e o serviço fica preso no manager
-      # (mesmo motivo do "db": volume nomeado é local ao nó, se o container
-      # mudasse de nó "perderia" o que já tinha sido enviado nesse nó).
-      - focco_uploads:/app/public/uploads
     deploy:
-      placement:
-        constraints: [node.role == manager]
       labels:
         - traefik.enable=true
         - traefik.http.routers.focco.rule=Host(`${DOMAIN}`)
@@ -82,8 +48,6 @@ services:
         - traefik.http.routers.focco.service=focco
         - traefik.docker.network=HDSwarmNet
         - traefik.http.routers.focco.entrypoints=websecure
-        # Segunda rota, mesma imagem/serviço — só a vitrine pública (ver
-        # PUBLIC_DOMAIN acima). Fallback inofensivo se não estiver definida.
         - traefik.http.routers.focco-public.rule=Host(`${PUBLIC_DOMAIN:-nao-configurado.invalid}`)
         - traefik.http.routers.focco-public.tls.certresolver=letsencryptresolver
         - traefik.http.routers.focco-public.service=focco
@@ -99,4 +63,3 @@ networks:
 
 volumes:
   focco_db_data:
-  focco_uploads:

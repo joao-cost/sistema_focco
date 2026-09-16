@@ -48,9 +48,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/docker-entrypoint.sh ./docker-ent
 
 RUN chmod +x ./docker-entrypoint.sh
 
-# Pasta de fotos de perfil — criada (e já com dono certo) antes do volume
-# nomeado (focco_uploads, ver docker-stack.yml) ser montado aqui, pra ele
-# herdar essa permissão na primeira vez que subir, em vez de ficar do root.
+# Fallback local de fotos de perfil, caso o R2 (ver src/lib/storage.ts) não
+# esteja configurado.
 RUN mkdir -p public/uploads/avatars && chown -R nextjs:nodejs public/uploads
 
 USER nextjs

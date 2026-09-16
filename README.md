@@ -172,9 +172,9 @@ Swarm nem some se o container for recriado num nó diferente.
    - `R2_BUCKET` — nome do bucket (ex: `sistema-focco`).
    - `R2_PUBLIC_URL` — a URL do passo 2, sem barra no final.
 
-Sem essas variáveis, o upload de foto cai num fallback local em disco
-(volume Docker `focco_uploads`, ver `docker-stack.yml`) — funciona, só que
-com a limitação de node do Swarm mencionada acima.
+Sem essas variáveis, o upload de foto cai num fallback local em disco do
+próprio container — funciona, mas não é persistente (some se o container
+reiniciar ou mudar de nó no Swarm). Em produção, use o R2.
 
 ## Deploy em produção (VPS / Docker Swarm / Portainer)
 
