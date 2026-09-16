@@ -64,6 +64,26 @@ function DecorRibbons() {
     "M 200 -50 C 350 250, 250 550, 450 950",
     "M 900 -50 C 800 250, 950 550, 800 950",
   ];
+  // Preenche os cantos vazios (superior esquerdo / inferior direito) com
+  // bolinhas e quadradinhos rotacionados — some quando os cards de célula
+  // ocuparem esse espaço, mas ajuda enquanto a vitrine ainda está vazia.
+  const DOTS = [
+    { cx: 60, cy: 55, r: 10, color: "var(--focco-green)", o: 0.5 },
+    { cx: 145, cy: 35, r: 6, color: "var(--focco-orange)", o: 0.45 },
+    { cx: 225, cy: 95, r: 14, color: "var(--focco-blue)", o: 0.32 },
+    { cx: 90, cy: 165, r: 5, color: "var(--focco-pink)", o: 0.5 },
+    { cx: 280, cy: 185, r: 8, color: "var(--focco-orange)", o: 0.4 },
+    { cx: 950, cy: 760, r: 12, color: "var(--focco-pink)", o: 0.4 },
+    { cx: 1040, cy: 825, r: 7, color: "var(--focco-blue)", o: 0.5 },
+    { cx: 1120, cy: 745, r: 16, color: "var(--focco-green)", o: 0.3 },
+    { cx: 900, cy: 855, r: 6, color: "var(--focco-blue)", o: 0.45 },
+  ];
+  const SQUARES = [
+    { x: 160, y: 140, size: 20, rot: 20, color: "var(--focco-red)", o: 0.3 },
+    { x: 30, y: 185, size: 14, rot: -15, color: "var(--focco-green)", o: 0.35 },
+    { x: 995, y: 690, size: 18, rot: 15, color: "var(--focco-orange)", o: 0.3 },
+    { x: 1135, y: 845, size: 14, rot: -20, color: "var(--focco-red)", o: 0.35 },
+  ];
 
   return (
     <svg
@@ -74,6 +94,22 @@ function DecorRibbons() {
     >
       {HAIRLINES.map((d, i) => (
         <path key={i} d={d} fill="none" stroke="white" strokeWidth={1} opacity={0.07} />
+      ))}
+      {DOTS.map((d, i) => (
+        <circle key={i} cx={d.cx} cy={d.cy} r={d.r} fill={d.color} opacity={d.o} />
+      ))}
+      {SQUARES.map((s, i) => (
+        <rect
+          key={i}
+          x={s.x}
+          y={s.y}
+          width={s.size}
+          height={s.size}
+          rx={4}
+          fill={s.color}
+          opacity={s.o}
+          transform={`rotate(${s.rot} ${s.x + s.size / 2} ${s.y + s.size / 2})`}
+        />
       ))}
       {RIBBONS.map((r, i) => (
         <path
