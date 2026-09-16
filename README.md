@@ -176,16 +176,12 @@ Sem essas variáveis, o upload de foto cai num fallback local em disco
 (volume Docker `focco_uploads`, ver `docker-stack.yml`) — funciona, só que
 com a limitação de node do Swarm mencionada acima.
 
-## Deploy em produção (VPS / Docker Swarm)
+## Deploy em produção (VPS / Docker Swarm / Portainer)
 
-Duas opções, no mesmo repositório: `docker-compose.prod.yml` (mais simples,
-um único servidor, sem HTTPS automático) ou `docker-stack.yml` (Docker Swarm,
-usando o Traefik que já roda na VPS — HTTPS automático via Let's Encrypt).
-
-### Opção A — Docker Swarm (usando o Traefik já existente na VPS)
-
-`docker-stack.yml` não sobe um Traefik próprio — ele se conecta ao Traefik
-que já roda na VPS (rede externa `HDSwarmNet`, certresolver
+Único caminho de deploy do projeto: `docker-stack.yml`, no Docker Swarm da
+VPS, aplicado pela interface do **Portainer** (stack `focco`) — não pela
+linha de comando. Ele não sobe um Traefik próprio: se conecta ao Traefik que
+já roda na VPS (rede externa `HDSwarmNet`, certresolver
 `letsencryptresolver`), do mesmo jeito que o Portainer já faz. A imagem
 também não é construída na VPS: o GitHub Actions builda e publica no Docker
 Hub a cada push na `main` (ver `.github/workflows/docker-publish.yml`) — a
@@ -204,95 +200,28 @@ VPS só puxa a tag pronta.
    mesmo digitando a URL direto — ver `src/proxy.ts`). Sem definir
    `PUBLIC_DOMAIN`, a vitrine continua acessível normalmente em
    `<DOMAIN>/vitrine`, só não tem esse domínio próprio.
-4. Copie `.env.prod.example` para `.env.prod` e preencha `DB_PASSWORD`,
-   `AUTH_SECRET` (gere com `openssl rand -base64 32`), `DOMAIN`,
-   `PUBLIC_DOMAIN` (opcional) e `DOCKERHUB_IMAGE` (ex:
-   `seuusuario/sistema_focco:latest`).
-5. Deploy — o Swarm puxa a imagem do Docker Hub automaticamente:
-   ```bash
-   export $(grep -v '^#' .env.prod | xargs)
-   docker stack deploy -c docker-stack.yml focco
-   ```
-6. Acompanhe a subida:
-   ```bash
-   docker service ls
-   docker service logs -f focco_app
-   ```
-   O Traefik emite o certificado automaticamente na primeira requisição
-   HTTPS — pode levar alguns segundos após o DNS propagar.
-7. Pra atualizar depois de um novo push (a imagem nova já está publicada):
-   ```bash
-   export $(grep -v '^#' .env.prod | xargs)
-   docker service update --image $DOCKERHUB_IMAGE --force focco_app
-   ```
+4. No Portainer, crie (ou edite) a stack `focco`, colando o conteúdo de
+   `docker-stack.yml`, e preencha nas **Environment variables** da stack:
 
-### Opção B — `docker compose` simples (sem HTTPS automático)
+   | Variável | Obrigatória | Descrição |
+   |---|:---:|---|
+   | `DB_PASSWORD` | sim | senha do Postgres |
+   | `AUTH_SECRET` | sim | `openssl rand -base64 32` |
+   | `DOMAIN` | sim | domínio do sistema (ex: `appfocco.seudominio.com`) |
+   | `DOCKERHUB_IMAGE` | sim | `seuusuario/sistema_focco:latest` |
+   | `PUBLIC_DOMAIN` | não | domínio público da vitrine — ver passo 3 |
+   | `SMTP_*` / `EMAIL_FROM` | não | ver seção "E-mail (SMTP Gmail)" |
+   | `R2_*` | não | ver seção "Armazenamento de arquivos (R2)" |
 
-1. Copie `.env.prod.example` para `.env.prod` e preencha `DB_PASSWORD`,
-   `AUTH_SECRET` e `AUTH_URL`.
-2. Construa a imagem:
-   ```bash
-   docker build -t sistema_focco:latest .
-   ```
-3. Suba:
-   ```bash
-   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
-   ```
-4. Coloque você mesmo um reverso proxy (Nginx, Caddy) na frente da porta
-   3000 com HTTPS — recomendado pela própria documentação de self-hosting do
-   Next.js.
-
-### Em ambas as opções
+5. **Deploy the stack** — o Swarm puxa a imagem do Docker Hub automaticamente.
+   O Traefik emite o certificado HTTPS sozinho na primeira requisição — pode
+   levar alguns segundos após o DNS propagar.
+6. Pra atualizar depois de um novo push (a imagem nova já está publicada),
+   basta **Update the stack** de novo no Portainer.
 
 As migrations do banco rodam automaticamente na inicialização do container
 (`docker-entrypoint.sh`), antes do servidor subir — com retentativas
 automáticas caso o Postgres ainda não esteja pronto para aceitar conexões.
-
-## Deploy em produção (Vercel + Supabase, 100% gratuito)
-
-Alternativa sem servidor próprio, usando os planos gratuitos da Vercel
-(hosting) e do Supabase (Postgres). Útil para validar o sistema antes de
-investir numa VPS — tem limitações (ver abaixo) mas roda o app real.
-
-1. **Crie o projeto no Supabase** (supabase.com, plano Free): anote a senha
-   do banco na criação. Em *Project Settings > Database > Connection string*
-   pegue duas strings:
-   - **Transaction pooler** (porta 6543) → variável `DATABASE_URL`
-   - **Session pooler** (porta 5432, mesmo host do pooler) → variável
-     `DIRECT_URL`. **Não use a "Direct connection"** (`db.xxx.supabase.co`) —
-     esse host só resolve em IPv6 e o build da Vercel não tem rota IPv6 de
-     saída (dá `ENETUNREACH`). O Session pooler é IPv4 e suporta DDL/migrations
-     normalmente.
-2. **Importe o repositório na Vercel** (vercel.com > Add New > Project),
-   selecionando este repo no GitHub. A Vercel detecta Next.js automaticamente.
-3. **Configure as variáveis de ambiente** do projeto na Vercel
-   (Settings > Environment Variables), para o ambiente de Produção:
-   - `DATABASE_URL` — connection string do pooler (passo 1)
-   - `DIRECT_URL` — connection string direta (passo 1)
-   - `AUTH_SECRET` — gere com `openssl rand -base64 32`
-   - `DATABASE_POOL_MAX=2` (opcional, mas recomendado em serverless)
-4. **Deploy.** O build usa `scripts/vercel-build.sh` (configurado via
-   `vercel.json`), que roda as migrations (`scripts/migrate.mjs`, usando
-   `DIRECT_URL`) **apenas quando `VERCEL_ENV=production`** — ou seja, só no
-   deploy da branch de produção, nunca em Preview Deployments de PRs/branches,
-   já que o Supabase Free tem um único banco compartilhado por todos os
-   ambientes.
-5. Depois do primeiro deploy, rode o seed (`npm run db:seed`) uma vez, ou
-   crie o primeiro usuário `coordenacao` manualmente no banco.
-
-**Limitações a ter em mente** (planos Free, ago/2026 — reconfirme nos sites
-oficiais antes de decidir permanecer):
-
-- Supabase Free **pausa o projeto automaticamente após ~1 semana sem uso**
-  (precisa reativar manualmente no painel).
-- Banco limitado a 500 MB, até 60 conexões diretas / 200 via pooler, sem
-  backups automáticos, logs com retenção de 1 dia.
-- Vercel Hobby é para **uso pessoal/não-comercial**; funções com limite de
-  duração de 300s e uso de CPU mensurado (4 CPU-horas/mês).
-- Se essas limitações pesarem (ex: uso real e contínuo pela coordenação do
-  FOCCO), o caminho de volta é o deploy em VPS/Docker Swarm descrito acima —
-  o código já é compatível com os dois (a diferença é só a origem das
-  variáveis `DATABASE_URL`/`DIRECT_URL`).
 
 ## Estrutura do projeto
 
@@ -319,7 +248,7 @@ src/
 scripts/migrate.mjs           runner de migrations para produção (Docker)
 Dockerfile                    build multi-stage (produção)
 docker-compose.yml            ambiente de desenvolvimento
-docker-compose.prod.yml       ambiente de produção (VPS/Swarm)
+docker-stack.yml              deploy em produção (Docker Swarm/Portainer)
 ```
 
 ## Possíveis evoluções
