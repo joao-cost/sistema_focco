@@ -13,6 +13,7 @@ const ALL_LINKS: { href: string; label: string; module: ModuleKey; roles: UserRo
   { href: "/chamada", label: "Chamada", module: "chamada", roles: ["coordenacao", "facilitador"] },
   { href: "/avisos", label: "Avisos", module: "avisos", roles: ["coordenacao", "facilitador", "articulador"] },
   { href: "/usuarios", label: "Usuários", module: "usuarios", roles: ["coordenacao", "facilitador"] },
+  { href: "/financeiro", label: "Financeiro", module: "financeiro", roles: ["coordenacao", "facilitador"] },
 ];
 
 export function Nav({ role, onNavigate }: { role: UserRole; onNavigate?: () => void }) {

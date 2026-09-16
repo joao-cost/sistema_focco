@@ -82,6 +82,30 @@ export const changePasswordSchema = z
     path: ["confirmPassword"],
   });
 
+export const vaquinhaMesSchema = z.object({
+  competencia: z.string().regex(/^\d{4}-\d{2}$/, "Formato inválido (AAAA-MM)."),
+  valorEsperado: z.coerce.number().positive("Informe um valor válido."),
+});
+
+export const marcarPagamentoSchema = z.object({
+  valorPago: z.coerce.number().positive("Informe um valor válido.").optional(),
+  dataPagamento: z.iso.date().optional().or(z.literal("")),
+});
+
+export const compraSchema = z.object({
+  descricao: z.string().trim().min(3, "Informe a descrição."),
+  valorTotal: z.coerce.number().positive("Informe um valor válido."),
+  data: z.iso.date("Informe a data."),
+  participantes: z.array(z.uuid()).min(1, "Selecione ao menos um participante."),
+});
+
+export const movimentacaoSchema = z.object({
+  tipo: z.enum(["entrada", "saida"]),
+  descricao: z.string().trim().min(3, "Informe a descrição."),
+  valor: z.coerce.number().positive("Informe um valor válido."),
+  data: z.iso.date("Informe a data."),
+});
+
 export const requestPasswordResetSchema = z.object({
   email: z.email("E-mail inválido."),
 });

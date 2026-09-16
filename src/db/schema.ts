@@ -9,6 +9,7 @@ import {
   date,
   primaryKey,
   integer,
+  numeric,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -398,4 +399,83 @@ export const presencasRelations = relations(presencas, ({ one }) => ({
     fields: [presencas.celulandoId],
     references: [celulandos.id],
   }),
+}));
+
+// ---------------------------------------------------------------------------
+// Financeiro (privado — coordenação e facilitador): vaquinha mensal, compras
+// divididas entre participantes, e movimentações avulsas de caixa.
+// ---------------------------------------------------------------------------
+
+export const movimentacaoTipoEnum = pgEnum("movimentacao_tipo", ["entrada", "saida"]);
+
+/** Um lançamento da vaquinha por (mês, pessoa) — quem pagou, quem não pagou. */
+export const vaquinhaPagamentos = pgTable("vaquinha_pagamentos", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  competencia: varchar("competencia", { length: 7 }).notNull(), // "AAAA-MM"
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  valorEsperado: numeric("valor_esperado", { precision: 10, scale: 2 }).notNull(),
+  pago: boolean("pago").notNull().default(false),
+  valorPago: numeric("valor_pago", { precision: 10, scale: 2 }),
+  dataPagamento: date("data_pagamento"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+/** Uma compra/pedido dividido entre participantes (ex: camisetas). */
+export const compras = pgTable("compras", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  descricao: varchar("descricao", { length: 255 }).notNull(),
+  valorTotal: numeric("valor_total", { precision: 10, scale: 2 }).notNull(),
+  data: date("data").notNull(),
+  registradoPorId: uuid("registrado_por_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "restrict" }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+/** Rateio da compra — quanto cada participante deve e se já pagou. */
+export const compraParticipantes = pgTable("compra_participantes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  compraId: uuid("compra_id")
+    .notNull()
+    .references(() => compras.id, { onDelete: "cascade" }),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  valorDevido: numeric("valor_devido", { precision: 10, scale: 2 }).notNull(),
+  pago: boolean("pago").notNull().default(false),
+  dataPagamento: date("data_pagamento"),
+});
+
+/** Movimentações avulsas de caixa (despesas soltas, entradas fora da vaquinha/compra). */
+export const movimentacoes = pgTable("movimentacoes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  tipo: movimentacaoTipoEnum("tipo").notNull(),
+  descricao: varchar("descricao", { length: 255 }).notNull(),
+  valor: numeric("valor", { precision: 10, scale: 2 }).notNull(),
+  data: date("data").notNull(),
+  registradoPorId: uuid("registrado_por_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "restrict" }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const vaquinhaPagamentosRelations = relations(vaquinhaPagamentos, ({ one }) => ({
+  user: one(users, { fields: [vaquinhaPagamentos.userId], references: [users.id] }),
+}));
+
+export const comprasRelations = relations(compras, ({ many }) => ({
+  participantes: many(compraParticipantes),
+}));
+
+export const compraParticipantesRelations = relations(compraParticipantes, ({ one }) => ({
+  compra: one(compras, { fields: [compraParticipantes.compraId], references: [compras.id] }),
+  user: one(users, { fields: [compraParticipantes.userId], references: [users.id] }),
 }));

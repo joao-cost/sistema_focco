@@ -9,7 +9,8 @@ export type ModuleKey =
   | "bolsistas"
   | "chamada"
   | "avisos"
-  | "usuarios";
+  | "usuarios"
+  | "financeiro";
 
 export type ModuleTheme = {
   /** Texto/título sobre fundo pálido do tema. */
@@ -59,6 +60,16 @@ const THEMES: Record<Exclude<ModuleKey, "dashboard">, ModuleTheme> = {
     decor: ["bg-focco-red", "bg-focco-red-dark", "bg-focco-red"],
   },
   usuarios: {
+    text: "text-focco-green-dark",
+    bg: "bg-focco-green-pale",
+    border: "border-focco-green-pale",
+    primary: "bg-focco-green hover:bg-focco-green-dark",
+    primaryHover: "hover:bg-focco-green-dark",
+    decor: ["bg-focco-green", "bg-focco-green-dark", "bg-focco-green"],
+  },
+  // Reaproveita o verde de Usuários — dinheiro = verde é a associação mais
+  // óbvia, e os dois não ficam lado a lado no menu.
+  financeiro: {
     text: "text-focco-green-dark",
     bg: "bg-focco-green-pale",
     border: "border-focco-green-pale",
