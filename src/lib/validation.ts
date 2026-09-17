@@ -106,6 +106,23 @@ export const movimentacaoSchema = z.object({
   data: z.iso.date("Informe a data."),
 });
 
+const HORA_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+export const reservaSalaSchema = z
+  .object({
+    celulaId: z.uuid("Selecione a célula."),
+    tipo: z.enum(["aplicacao", "preparacao"]),
+    diaSemana: z.enum(["segunda", "terca", "quarta", "quinta", "sexta", "sabado", "domingo"]),
+    horaInicio: z.string().regex(HORA_REGEX, "Horário inválido."),
+    horaFim: z.string().regex(HORA_REGEX, "Horário inválido."),
+    sala: z.string().trim().min(1, "Informe a sala.").max(100),
+    observacoes: z.string().trim().max(500).optional().or(z.literal("")),
+  })
+  .refine((d) => d.horaFim > d.horaInicio, {
+    message: "O horário final deve ser depois do inicial.",
+    path: ["horaFim"],
+  });
+
 export const requestPasswordResetSchema = z.object({
   email: z.email("E-mail inválido."),
 });

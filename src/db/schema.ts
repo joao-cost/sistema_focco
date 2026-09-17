@@ -343,6 +343,7 @@ export const celulasRelations = relations(celulas, ({ one, many }) => ({
   celulandos: many(celulandos),
   encontros: many(encontros),
   avisos: many(avisos),
+  reservasSala: many(reservasSala),
 }));
 
 export const avisosRelations = relations(avisos, ({ one }) => ({
@@ -478,4 +479,35 @@ export const comprasRelations = relations(compras, ({ many }) => ({
 export const compraParticipantesRelations = relations(compraParticipantes, ({ one }) => ({
   compra: one(compras, { fields: [compraParticipantes.compraId], references: [compras.id] }),
   user: one(users, { fields: [compraParticipantes.userId], references: [users.id] }),
+}));
+
+// ---------------------------------------------------------------------------
+// Agenda: reserva semanal recorrente de sala, ligada a uma célula. "aplicacao"
+// é o horário em que a célula acontece (sala informada); "preparacao" é o
+// horário reservado pra preparar a célula (sempre na sala C1).
+// ---------------------------------------------------------------------------
+
+export const reservaTipoEnum = pgEnum("reserva_tipo", ["aplicacao", "preparacao"]);
+
+export const reservasSala = pgTable("reservas_sala", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  celulaId: uuid("celula_id")
+    .notNull()
+    .references(() => celulas.id, { onDelete: "cascade" }),
+  tipo: reservaTipoEnum("tipo").notNull(),
+  diaSemana: diaSemanaEnum("dia_semana").notNull(),
+  horaInicio: varchar("hora_inicio", { length: 5 }).notNull(), // "HH:MM"
+  horaFim: varchar("hora_fim", { length: 5 }).notNull(),
+  sala: varchar("sala", { length: 100 }).notNull(),
+  observacoes: text("observacoes"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const reservasSalaRelations = relations(reservasSala, ({ one }) => ({
+  celula: one(celulas, { fields: [reservasSala.celulaId], references: [celulas.id] }),
 }));

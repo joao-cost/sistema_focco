@@ -10,7 +10,8 @@ export type ModuleKey =
   | "chamada"
   | "avisos"
   | "usuarios"
-  | "financeiro";
+  | "financeiro"
+  | "agenda";
 
 export type ModuleTheme = {
   /** Texto/título sobre fundo pálido do tema. */
@@ -76,6 +77,16 @@ const THEMES: Record<Exclude<ModuleKey, "dashboard">, ModuleTheme> = {
     primary: "bg-focco-green hover:bg-focco-green-dark",
     primaryHover: "hover:bg-focco-green-dark",
     decor: ["bg-focco-green", "bg-focco-green-dark", "bg-focco-green"],
+  },
+  // Reaproveita o azul de Células — agenda é basicamente o horário das
+  // células visto de outro ângulo, e os dois não ficam lado a lado no menu.
+  agenda: {
+    text: "text-focco-blue-dark",
+    bg: "bg-focco-blue-pale",
+    border: "border-focco-blue-pale",
+    primary: "bg-focco-blue hover:bg-focco-blue-dark",
+    primaryHover: "hover:bg-focco-blue-dark",
+    decor: ["bg-focco-blue", "bg-focco-blue-dark", "bg-focco-blue"],
   },
 };
 

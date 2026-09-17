@@ -9,6 +9,7 @@ import type { UserRole } from "@/auth";
 const ALL_LINKS: { href: string; label: string; module: ModuleKey; roles: UserRole[] }[] = [
   { href: "/coordenacao", label: "Dashboard", module: "dashboard", roles: ["coordenacao", "facilitador"] },
   { href: "/celulas", label: "Células", module: "celulas", roles: ["coordenacao", "facilitador", "articulador"] },
+  { href: "/agenda", label: "Agenda", module: "agenda", roles: ["coordenacao", "facilitador", "articulador"] },
   { href: "/bolsistas", label: "Bolsistas", module: "bolsistas", roles: ["coordenacao", "facilitador"] },
   { href: "/chamada", label: "Chamada", module: "chamada", roles: ["coordenacao", "facilitador"] },
   { href: "/avisos", label: "Avisos", module: "avisos", roles: ["coordenacao", "facilitador", "articulador"] },
