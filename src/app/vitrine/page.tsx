@@ -68,21 +68,36 @@ function DecorRibbons() {
   // bolinhas e quadradinhos rotacionados — some quando os cards de célula
   // ocuparem esse espaço, mas ajuda enquanto a vitrine ainda está vazia.
   const DOTS = [
-    { cx: 60, cy: 55, r: 10, color: "var(--focco-green)", o: 0.5 },
-    { cx: 145, cy: 35, r: 6, color: "var(--focco-orange)", o: 0.45 },
-    { cx: 225, cy: 95, r: 14, color: "var(--focco-blue)", o: 0.32 },
-    { cx: 90, cy: 165, r: 5, color: "var(--focco-pink)", o: 0.5 },
-    { cx: 280, cy: 185, r: 8, color: "var(--focco-orange)", o: 0.4 },
-    { cx: 950, cy: 760, r: 12, color: "var(--focco-pink)", o: 0.4 },
-    { cx: 1040, cy: 825, r: 7, color: "var(--focco-blue)", o: 0.5 },
-    { cx: 1120, cy: 745, r: 16, color: "var(--focco-green)", o: 0.3 },
-    { cx: 900, cy: 855, r: 6, color: "var(--focco-blue)", o: 0.45 },
+    // canto superior esquerdo
+    { cx: 25, cy: 25, r: 14, color: "var(--focco-green)", o: 0.55 },
+    { cx: 60, cy: 55, r: 14, color: "var(--focco-green)", o: 0.5 },
+    { cx: 145, cy: 35, r: 9, color: "var(--focco-orange)", o: 0.45 },
+    { cx: 190, cy: 15, r: 5, color: "var(--focco-pink)", o: 0.4 },
+    { cx: 250, cy: 60, r: 5, color: "var(--focco-green)", o: 0.35 },
+    { cx: 225, cy: 95, r: 18, color: "var(--focco-blue)", o: 0.32 },
+    { cx: 15, cy: 130, r: 6, color: "var(--focco-red)", o: 0.45 },
+    { cx: 90, cy: 165, r: 7, color: "var(--focco-pink)", o: 0.5 },
+    { cx: 280, cy: 185, r: 11, color: "var(--focco-orange)", o: 0.4 },
+    // canto inferior direito
+    { cx: 950, cy: 760, r: 16, color: "var(--focco-pink)", o: 0.4 },
+    { cx: 1150, cy: 680, r: 6, color: "var(--focco-pink)", o: 0.35 },
+    { cx: 1040, cy: 825, r: 10, color: "var(--focco-blue)", o: 0.5 },
+    { cx: 1120, cy: 745, r: 20, color: "var(--focco-green)", o: 0.3 },
+    { cx: 900, cy: 855, r: 8, color: "var(--focco-blue)", o: 0.45 },
+    { cx: 1000, cy: 890, r: 6, color: "var(--focco-red)", o: 0.4 },
+    { cx: 1175, cy: 880, r: 16, color: "var(--focco-orange)", o: 0.5 },
   ];
   const SQUARES = [
-    { x: 160, y: 140, size: 20, rot: 20, color: "var(--focco-red)", o: 0.3 },
-    { x: 30, y: 185, size: 14, rot: -15, color: "var(--focco-green)", o: 0.35 },
-    { x: 995, y: 690, size: 18, rot: 15, color: "var(--focco-orange)", o: 0.3 },
-    { x: 1135, y: 845, size: 14, rot: -20, color: "var(--focco-red)", o: 0.35 },
+    // canto superior esquerdo
+    { x: 55, y: 25, size: 16, rot: 35, color: "var(--focco-blue)", o: 0.3 },
+    { x: 160, y: 140, size: 26, rot: 20, color: "var(--focco-red)", o: 0.3 },
+    { x: 30, y: 185, size: 18, rot: -15, color: "var(--focco-green)", o: 0.35 },
+    { x: 235, y: 150, size: 14, rot: -25, color: "var(--focco-pink)", o: 0.28 },
+    // canto inferior direito
+    { x: 995, y: 690, size: 24, rot: 15, color: "var(--focco-orange)", o: 0.3 },
+    { x: 1060, y: 760, size: 15, rot: 40, color: "var(--focco-green)", o: 0.28 },
+    { x: 900, y: 800, size: 13, rot: -10, color: "var(--focco-blue)", o: 0.3 },
+    { x: 1135, y: 845, size: 18, rot: -20, color: "var(--focco-red)", o: 0.35 },
   ];
 
   return (
