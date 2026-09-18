@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { celulas, reservasSala } from "@/db/schema";
 import { verifySession } from "@/lib/dal";
@@ -43,6 +43,48 @@ function parseReserva(formData: FormData) {
   });
 }
 
+function formatHora(hhmm: string) {
+  const [h, m] = hhmm.split(":");
+  return m === "00" ? `${Number(h)}h` : `${Number(h)}h${m}`;
+}
+
+function deriveTurno(horaInicio: string): "manha" | "tarde" | "noite" {
+  const h = Number(horaInicio.split(":")[0]);
+  if (h < 12) return "manha";
+  if (h < 18) return "tarde";
+  return "noite";
+}
+
+/**
+ * A célula só tem um horário/sala fixos no cadastro (é o que aparece na
+ * vitrine pública) — não faz sentido registrar de novo aqui na Agenda.
+ * Sempre que uma reserva "aplicacao" (horário de célula) dessa célula muda,
+ * refaz o cadastro a partir da reserva mais cedo na semana; sem nenhuma,
+ * limpa os campos.
+ */
+async function syncCelulaHorario(celulaId: string) {
+  const aplicacoes = await db.query.reservasSala.findMany({
+    where: and(eq(reservasSala.celulaId, celulaId), eq(reservasSala.tipo, "aplicacao")),
+    orderBy: (r, { asc }) => [asc(r.diaSemana), asc(r.horaInicio)],
+  });
+  const principal = aplicacoes[0];
+
+  await db
+    .update(celulas)
+    .set({
+      diaSemana: (principal?.diaSemana ?? null) as never,
+      turno: (principal ? deriveTurno(principal.horaInicio) : null) as never,
+      horario: principal ? `${formatHora(principal.horaInicio)} às ${formatHora(principal.horaFim)}` : null,
+      local: principal?.sala ?? null,
+      updatedAt: new Date(),
+    })
+    .where(eq(celulas.id, celulaId));
+
+  revalidatePath("/celulas");
+  revalidatePath(`/celulas/${celulaId}`);
+  revalidatePath("/vitrine");
+}
+
 export async function createReservaAction(
   _prevState: AgendaActionState,
   formData: FormData
@@ -68,6 +110,7 @@ export async function createReservaAction(
   });
 
   revalidatePath("/agenda");
+  if (tipo === "aplicacao") await syncCelulaHorario(celulaId);
 
   if (conflitos.length > 0) {
     return {
@@ -87,7 +130,14 @@ export async function updateReservaAction(
   }
   const { celulaId, tipo, diaSemana, horaInicio, horaFim, sala, observacoes } = result.data;
 
+  const [existing] = await db
+    .select({ celulaId: reservasSala.celulaId, tipo: reservasSala.tipo })
+    .from(reservasSala)
+    .where(eq(reservasSala.id, reservaId))
+    .limit(1);
+
   await assertCanManageReserva(celulaId);
+  if (existing && existing.celulaId !== celulaId) await assertCanManageReserva(existing.celulaId);
 
   const conflitos = await findConflitos({ diaSemana, sala, horaInicio, horaFim, excludeId: reservaId });
 
@@ -98,6 +148,9 @@ export async function updateReservaAction(
 
   revalidatePath("/agenda");
 
+  if (tipo === "aplicacao") await syncCelulaHorario(celulaId);
+  if (existing?.tipo === "aplicacao" && existing.celulaId !== celulaId) await syncCelulaHorario(existing.celulaId);
+
   if (conflitos.length > 0) {
     return {
       warning: `Salvo, mas ${sala} já tem ${conflitos.map((c) => c.celula.nome).join(", ")} nesse horário.`,
@@ -107,7 +160,7 @@ export async function updateReservaAction(
 
 export async function deleteReservaAction(reservaId: string) {
   const [reserva] = await db
-    .select({ celulaId: reservasSala.celulaId })
+    .select({ celulaId: reservasSala.celulaId, tipo: reservasSala.tipo })
     .from(reservasSala)
     .where(eq(reservasSala.id, reservaId))
     .limit(1);
@@ -116,4 +169,6 @@ export async function deleteReservaAction(reservaId: string) {
   await assertCanManageReserva(reserva.celulaId);
   await db.delete(reservasSala).where(eq(reservasSala.id, reservaId));
   revalidatePath("/agenda");
+
+  if (reserva.tipo === "aplicacao") await syncCelulaHorario(reserva.celulaId);
 }

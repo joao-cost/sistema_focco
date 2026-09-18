@@ -175,7 +175,7 @@ export function AgendaCalendar({ reservas, celulas }: { reservas: Reserva[]; cel
       </Card>
 
       {selecionada && (
-        <ReservaForm
+        <ReservaModal
           initial={selecionada === "nova" ? undefined : selecionada}
           celulas={celulas}
           onCancel={() => setSelecionada(null)}
@@ -185,6 +185,33 @@ export function AgendaCalendar({ reservas, celulas }: { reservas: Reserva[]; cel
           }}
         />
       )}
+    </div>
+  );
+}
+
+function ReservaModal(props: {
+  initial?: Reserva;
+  celulas: Celula[];
+  onCancel: () => void;
+  onSaved: (warning?: string) => void;
+}) {
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") props.onCancel();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      onClick={props.onCancel}
+    >
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <ReservaForm {...props} />
+      </div>
     </div>
   );
 }
@@ -217,8 +244,13 @@ function ReservaForm({
     <Card>
       <div className={cn(theme.bg, "flex items-center justify-between gap-3 border-b px-[18px] py-3.5", theme.border)}>
         <p className={cn(theme.text, "m-0 text-sm font-bold")}>{initial ? "Editar reserva" : "Nova reserva"}</p>
-        <button type="button" onClick={onCancel} className="text-xs font-semibold text-text-secondary hover:underline">
-          Fechar
+        <button
+          type="button"
+          onClick={onCancel}
+          aria-label="Fechar"
+          className="flex h-7 w-7 items-center justify-center rounded-full text-lg font-bold text-text-secondary hover:bg-black/10"
+        >
+          ×
         </button>
       </div>
 
@@ -271,6 +303,12 @@ function ReservaForm({
           <Field label="Sala">
             <Input value="C1 (fixo para preparação)" disabled />
           </Field>
+        )}
+
+        {tipo === "aplicacao" && (
+          <p className="m-0 text-[11px] text-text-tertiary sm:col-span-2">
+            Isso atualiza o dia/horário/sala no cadastro dessa célula — o mesmo que aparece na vitrine pública.
+          </p>
         )}
 
         <Field label="Hora início" htmlFor="horaInicio" error={state?.fieldErrors?.horaInicio?.[0]}>
