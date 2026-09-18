@@ -34,6 +34,28 @@ export async function listCelulasForUser(session: Session) {
   return baseQuery.where(eq(celulas.articuladorId, session.user.id));
 }
 
+/** Todas as células do sistema — a lista principal é visível pra todo mundo, só a edição é restrita. */
+export async function listAllCelulas() {
+  return db
+    .select({
+      id: celulas.id,
+      nome: celulas.nome,
+      tema: celulas.tema,
+      curso: celulas.curso,
+      status: celulas.status,
+      diaSemana: celulas.diaSemana,
+      turno: celulas.turno,
+      horario: celulas.horario,
+      local: celulas.local,
+      logoUrl: celulas.logoUrl,
+      articuladorId: celulas.articuladorId,
+      articuladorNome: users.name,
+    })
+    .from(celulas)
+    .innerJoin(users, eq(celulas.articuladorId, users.id))
+    .orderBy(asc(celulas.nome));
+}
+
 export async function getCelulaDetail(celulaId: string, session: Session) {
   const celula = await db.query.celulas.findFirst({
     where: eq(celulas.id, celulaId),
@@ -58,20 +80,10 @@ export async function getCelulaDetail(celulaId: string, session: Session) {
 
   if (!celula) return null;
 
+  // A célula é visível pra qualquer usuário logado — só a edição é restrita
+  // a quem é coordenação/facilitador ou ao próprio articulador dela.
   const isOwner = celula.articuladorId === session.user.id;
-  if (!canManageAllCelulas(session) && !isOwner) {
-    return null; // sem permissão — tratado como "não encontrado" pelo chamador
-  }
-
   return { celula, canEdit: canManageAllCelulas(session) || isOwner };
-}
-
-export async function listArticuladores() {
-  return db
-    .select({ id: users.id, name: users.name, email: users.email })
-    .from(users)
-    .where(and(eq(users.role, "articulador"), eq(users.ativo, true)))
-    .orderBy(asc(users.name));
 }
 
 export async function listAllAvisos() {

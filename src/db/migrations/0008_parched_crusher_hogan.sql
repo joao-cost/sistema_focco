@@ -1,0 +1,1 @@
+ALTER TABLE "celulas" ADD COLUMN "logo_url" varchar(500);

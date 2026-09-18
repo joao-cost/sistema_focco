@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { verifySession } from "@/lib/dal";
-import { getCelulaDetail, listArticuladores } from "@/lib/queries/celulas";
+import { getCelulaDetail } from "@/lib/queries/celulas";
 import { updateCelulaAction } from "@/lib/actions/celulas";
 import { Card, CardHeader } from "@/components/ui";
 import { CelulaForm } from "../../celula-form";
@@ -16,7 +16,6 @@ export default async function EditarCelulaPage({
   if (!result || !result.canEdit) notFound();
 
   const { celula } = result;
-  const articuladores = await listArticuladores();
   const boundAction = updateCelulaAction.bind(null, celula.id);
 
   return (
@@ -25,12 +24,7 @@ export default async function EditarCelulaPage({
       <Card>
         <CardHeader title={celula.nome} />
         <div className="p-5">
-          <CelulaForm
-            action={boundAction}
-            articuladores={articuladores}
-            defaultValues={celula}
-            submitLabel="Salvar alterações"
-          />
+          <CelulaForm action={boundAction} defaultValues={celula} submitLabel="Salvar alterações" />
         </div>
       </Card>
     </div>

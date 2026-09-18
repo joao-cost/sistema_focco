@@ -102,10 +102,18 @@ export default async function CelulaDetailPage({
 
       <div className="mt-[18px] grid items-start gap-[18px] lg:grid-cols-2">
         <Card>
-          <div className="border-b border-border-subtle px-[18px] py-4">
+          <div className="flex items-center gap-3 border-b border-border-subtle px-[18px] py-4">
+            {celula.logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- vem do R2/disco, não vale a pena otimizar
+              <img src={celula.logoUrl} alt="" className="h-10 w-10 rounded-lg border border-border object-cover" />
+            ) : null}
             <p className="m-0 text-sm font-bold text-foreground">Dados da célula</p>
           </div>
           <dl className="space-y-2 px-[18px] py-4 text-sm">
+            <div className="flex justify-between gap-3">
+              <dt className="text-muted">Descrição</dt>
+              <dd className="max-w-[60%] text-right text-foreground">{celula.descricaoPublica ?? "—"}</dd>
+            </div>
             <div className="flex justify-between gap-3">
               <dt className="text-muted">Dia/turno</dt>
               <dd className="text-right text-foreground">

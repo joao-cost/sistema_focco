@@ -2,12 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { unlink, writeFile, mkdir } from "node:fs/promises";
+import path from "node:path";
+import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { celulandos, celulas, encontros, presencas, avisos } from "@/db/schema";
-import { verifySession, requireRole } from "@/lib/dal";
+import { verifySession } from "@/lib/dal";
 import { canManageAllCelulas, getCelulaRecipients } from "@/lib/queries/celulas";
 import { sendAvisoNotificationEmail } from "@/lib/email";
+import { deleteFromR2ByUrl, isR2Configured, uploadToR2 } from "@/lib/storage";
 import {
   avisoSchema,
   celulaSchema,
@@ -16,6 +20,34 @@ import {
 } from "@/lib/validation";
 
 export type ActionState = { error?: string; fieldErrors?: Record<string, string[]> } | undefined;
+
+const MAX_LOGO_BYTES = 3 * 1024 * 1024; // 3MB
+const ALLOWED_LOGO_TYPES: Record<string, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/webp": "webp",
+};
+const LOGO_UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "celulas");
+
+/** Sobe o logo pro R2 (ou disco local em dev) e apaga o anterior, se houver. */
+async function uploadCelulaLogo(file: File, current: string | null): Promise<string> {
+  const ext = ALLOWED_LOGO_TYPES[file.type];
+  const filename = `${randomUUID()}.${ext}`;
+  const bytes = Buffer.from(await file.arrayBuffer());
+
+  if (isR2Configured) {
+    const url = await uploadToR2(`celulas/${filename}`, bytes, file.type);
+    if (current) await deleteFromR2ByUrl(current);
+    return url;
+  }
+
+  await mkdir(LOGO_UPLOAD_DIR, { recursive: true });
+  await writeFile(path.join(LOGO_UPLOAD_DIR, filename), bytes);
+  if (current?.startsWith("/uploads/celulas/")) {
+    await unlink(path.join(process.cwd(), "public", current)).catch(() => {});
+  }
+  return `/uploads/celulas/${filename}`;
+}
 
 function parseOrError<T>(
   schema: { safeParse: (v: unknown) => { success: boolean; data?: T; error?: { flatten: () => { fieldErrors: Record<string, string[]> } } } },
@@ -52,13 +84,23 @@ export async function createCelulaAction(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  await requireRole("coordenacao", "facilitador");
+  const session = await verifySession();
+
+  const logoFile = formData.get("logo");
+  if (!(logoFile instanceof File) || logoFile.size === 0) {
+    return { error: "Envie um logo para a célula." };
+  }
+  if (!ALLOWED_LOGO_TYPES[logoFile.type]) {
+    return { error: "Logo precisa ser PNG, JPG ou WEBP." };
+  }
+  if (logoFile.size > MAX_LOGO_BYTES) {
+    return { error: "Logo muito grande (máximo 3MB)." };
+  }
 
   const parsed = parseOrError(celulaSchema, {
     nome: formData.get("nome"),
     tema: formData.get("tema") ?? "",
     curso: formData.get("curso") ?? "",
-    articuladorId: formData.get("articuladorId"),
     diaSemana: formData.get("diaSemana") ?? "",
     turno: formData.get("turno") ?? "",
     horario: formData.get("horario") ?? "",
@@ -73,7 +115,6 @@ export async function createCelulaAction(
     nome,
     tema,
     curso,
-    articuladorId,
     diaSemana,
     turno,
     horario,
@@ -83,17 +124,20 @@ export async function createCelulaAction(
     whatsappLink,
   } = parsed.data as z_CelulaInput;
 
+  const logoUrl = await uploadCelulaLogo(logoFile, null);
+
   const [created] = await db
     .insert(celulas)
     .values({
       nome,
       tema: tema || null,
       curso: curso || null,
-      articuladorId,
+      articuladorId: session.user.id,
       diaSemana: (diaSemana || null) as never,
       turno: (turno || null) as never,
       horario: horario || null,
       local: local || null,
+      logoUrl,
       observacoes: observacoes || null,
       descricaoPublica: descricaoPublica || null,
       whatsappLink: whatsappLink || null,
@@ -101,6 +145,7 @@ export async function createCelulaAction(
     .returning({ id: celulas.id });
 
   revalidatePath("/celulas");
+  revalidatePath("/vitrine");
   redirect(`/celulas/${created.id}`);
 }
 
@@ -111,11 +156,20 @@ export async function updateCelulaAction(
 ): Promise<ActionState> {
   await assertCanEditCelula(celulaId);
 
+  const logoFile = formData.get("logo");
+  if (logoFile instanceof File && logoFile.size > 0) {
+    if (!ALLOWED_LOGO_TYPES[logoFile.type]) {
+      return { error: "Logo precisa ser PNG, JPG ou WEBP." };
+    }
+    if (logoFile.size > MAX_LOGO_BYTES) {
+      return { error: "Logo muito grande (máximo 3MB)." };
+    }
+  }
+
   const parsed = parseOrError(celulaSchema, {
     nome: formData.get("nome"),
     tema: formData.get("tema") ?? "",
     curso: formData.get("curso") ?? "",
-    articuladorId: formData.get("articuladorId"),
     diaSemana: formData.get("diaSemana") ?? "",
     turno: formData.get("turno") ?? "",
     horario: formData.get("horario") ?? "",
@@ -130,7 +184,6 @@ export async function updateCelulaAction(
     nome,
     tema,
     curso,
-    articuladorId,
     diaSemana,
     turno,
     horario,
@@ -140,16 +193,24 @@ export async function updateCelulaAction(
     whatsappLink,
   } = parsed.data as z_CelulaInput;
 
+  const updates: Record<string, unknown> = {
+    nome,
+    tema: tema || null,
+    curso: curso || null,
+    diaSemana: (diaSemana || null) as never,
+    turno: (turno || null) as never,
+    horario: horario || null,
+  };
+
+  if (logoFile instanceof File && logoFile.size > 0) {
+    const [current] = await db.select({ logoUrl: celulas.logoUrl }).from(celulas).where(eq(celulas.id, celulaId)).limit(1);
+    updates.logoUrl = await uploadCelulaLogo(logoFile, current?.logoUrl ?? null);
+  }
+
   await db
     .update(celulas)
     .set({
-      nome,
-      tema: tema || null,
-      curso: curso || null,
-      articuladorId,
-      diaSemana: (diaSemana || null) as never,
-      turno: (turno || null) as never,
-      horario: horario || null,
+      ...updates,
       local: local || null,
       observacoes: observacoes || null,
       descricaoPublica: descricaoPublica || null,
@@ -160,6 +221,7 @@ export async function updateCelulaAction(
 
   revalidatePath("/celulas");
   revalidatePath(`/celulas/${celulaId}`);
+  revalidatePath("/vitrine");
   redirect(`/celulas/${celulaId}`);
 }
 
@@ -338,13 +400,12 @@ type z_CelulaInput = {
   nome: string;
   tema?: string;
   curso?: string;
-  articuladorId: string;
   diaSemana?: string;
   turno?: string;
   horario?: string;
   local?: string;
   observacoes?: string;
-  descricaoPublica?: string;
+  descricaoPublica: string;
   whatsappLink?: string;
 };
 

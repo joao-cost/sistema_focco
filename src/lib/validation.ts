@@ -4,7 +4,6 @@ export const celulaSchema = z.object({
   nome: z.string().trim().min(3, "Informe o nome da célula."),
   tema: z.string().trim().optional().or(z.literal("")),
   curso: z.string().trim().optional().or(z.literal("")),
-  articuladorId: z.uuid("Selecione um articulador."),
   diaSemana: z
     .enum(["segunda", "terca", "quarta", "quinta", "sexta", "sabado", "domingo"])
     .optional()
@@ -13,7 +12,7 @@ export const celulaSchema = z.object({
   horario: z.string().trim().optional().or(z.literal("")),
   local: z.string().trim().optional().or(z.literal("")),
   observacoes: z.string().trim().optional().or(z.literal("")),
-  descricaoPublica: z.string().trim().optional().or(z.literal("")),
+  descricaoPublica: z.string().trim().min(10, "Descreva a célula (mínimo 10 caracteres)."),
   whatsappLink: z.url("Link inválido.").optional().or(z.literal("")),
 });
 

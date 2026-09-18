@@ -57,6 +57,13 @@
       "when": 1789605504607,
       "tag": "0007_wonderful_cerebro",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789701734185,
+      "tag": "0008_parched_crusher_hogan",
+      "breakpoints": true
     }
   ]
 }

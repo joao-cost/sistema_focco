@@ -119,6 +119,7 @@ export const celulas = pgTable("celulas", {
   turno: turnoEnum("turno"),
   horario: varchar("horario", { length: 60 }), // ex: "13h30 às 17h30"
   local: varchar("local", { length: 255 }), // ex: "Sala C3"
+  logoUrl: varchar("logo_url", { length: 500 }),
   observacoes: text("observacoes"),
   // Campos usados na vitrine pública (focco.hyperdynamis.com) — opcionais,
   // preenchidos pela coordenação quando quiser divulgar a célula.
