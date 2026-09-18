@@ -106,10 +106,10 @@ export function AgendaCalendar({ reservas, celulas }: { reservas: Reserva[]; cel
 
         <div className="flex gap-3 border-b border-border-subtle px-[18px] py-2.5 text-[11px] text-text-secondary">
           <span className="flex items-center gap-1.5">
-            <span className="inline-block h-2.5 w-2.5 rounded-sm bg-focco-blue" /> Aplicação (aula da célula)
+            <span className="inline-block h-2.5 w-2.5 rounded-sm bg-focco-blue" /> Horário de célula
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="inline-block h-2.5 w-2.5 rounded-sm border border-focco-orange bg-focco-orange-pale" /> Preparação (sala C1)
+            <span className="inline-block h-2.5 w-2.5 rounded-sm border border-focco-orange bg-focco-orange-pale" /> Horário de preparação
           </span>
         </div>
 
@@ -245,8 +245,8 @@ function ReservaForm({
             value={tipo}
             onChange={(e) => setTipo(e.target.value as "aplicacao" | "preparacao")}
           >
-            <option value="aplicacao">Aplicação (aula da célula)</option>
-            <option value="preparacao">Preparação (uso da sala — sempre C1)</option>
+            <option value="aplicacao">Horário de célula</option>
+            <option value="preparacao">Horário de preparação (sala C1)</option>
           </Select>
         </Field>
 

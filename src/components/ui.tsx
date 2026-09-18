@@ -13,7 +13,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-xl border border-border bg-surface shadow-sm shadow-black/[0.03]",
+        "overflow-hidden rounded-xl border border-border bg-surface shadow-sm shadow-black/[0.03]",
         className
       )}
     >
